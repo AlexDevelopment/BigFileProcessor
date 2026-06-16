@@ -23,6 +23,35 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+## Visual Studio / IDE cache and settings
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+
+## ReSharper / Rider
+*.sln.iml
+riderModule.iml
+
+## Local configuration with potential secrets
+launchSettings.json
+appsettings.Development.json
+appsettings.Local.json
+
+## Entity Framework / SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+## Code coverage reports
+coverage/
+opencoverage/
+
+## Misc IDE artifacts
+.editorconfig~
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json
