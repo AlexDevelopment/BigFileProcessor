@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class FileSortRequest : IRequest
+    public record FileSortRequest : IRequest
     {
     }
 }

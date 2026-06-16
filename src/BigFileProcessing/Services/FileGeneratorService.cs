@@ -13,8 +13,12 @@ namespace Services
         public Task<Result<FileGenerationResponse>> GenerateAsync(FileGenerationRequest request)
         {
             string fileName = $"init_{DateTime.Now:yyyyMMddHHmmss}.txt";
-            int numberOfRecords = new Random().Next(1, 100);
-            var response = new FileGenerationResponse(fileName, numberOfRecords);
+
+            var response = new FileGenerationResponse() 
+            { 
+                FileName = fileName,
+                NumberOfRecords = request.NumberOfRecords
+            };
 
             return Task.FromResult(Result<FileGenerationResponse>.Success(response));
         }

@@ -1,11 +1,22 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
+
 using Services;
+
+var services = new ServiceCollection();
+
+services.AddSingleton<IFileGeneratorService, FileGeneratorService>();
+
+var serviceProvider = services.BuildServiceProvider();
+
+IFileGeneratorService service = serviceProvider.GetRequiredService<IFileGeneratorService>();
 
 Console.WriteLine("start file generation...\n");
 
-IFileGeneratorService service = new FileGeneratorService();
-
-var request = new FileGenerationRequest();
+var request = new FileGenerationRequest() 
+{ 
+    NumberOfRecords = new Random().Next(1, 100)
+};
 
 var result = await service.GenerateAsync(request);
 
@@ -20,5 +31,3 @@ else
     Console.WriteLine("file generation has failed");
     Console.WriteLine($"error: {result.Error}");
 }
-
-Console.ReadLine();

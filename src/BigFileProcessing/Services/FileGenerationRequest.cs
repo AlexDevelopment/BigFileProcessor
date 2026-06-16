@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class FileGenerationRequest : IRequest
+    public record FileGenerationRequest : IRequest
     {
+        public int NumberOfRecords { get; init; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class FileSortResponse : IResponse
+    public record FileSortResponse : IResponse
     {
     }
 }
