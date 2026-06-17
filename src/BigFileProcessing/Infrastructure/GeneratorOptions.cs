@@ -12,6 +12,8 @@
 
         #region Public properties
         public required long MaxFileSize { get; set; }
+        public required int[] Numbers { get; set; }
+        public required string[] Strings { get; set; }
 
         #endregion
     }

@@ -1,28 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 using BSI =BusinessLogic.Services.Interfaces;
-using BLO = BusinessLogic.Objects;
-using BSIM = BusinessLogic.Services.Implementations;
 using INF = Infrastructure;
+
+using Generator;
 
 
 var services = new ServiceCollection();
 
-IConfiguration configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile("appsettings.Development.json", optional: true)
-    .AddEnvironmentVariables()
-    .Build();
-
-services.AddOptions<INF.GeneratorOptions>()
-    .Bind(configuration.GetSection(INF.GeneratorOptions.SectionName))
-    .ValidateDataAnnotations();
-
-services.AddSingleton<BSI.IFileGeneratorService, BSIM.FileGeneratorService>();
-services.AddSingleton<BSI.IRowContentProvider, BSIM.SimpleRowContentProvider>();
+services.AddFileGenerationServices();
 
 var serviceProvider = services.BuildServiceProvider();
 
