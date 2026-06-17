@@ -8,7 +8,7 @@ namespace BusinessLogic.Constants
 {
     public class Files
     {
-        public const string InputFile = "input.txt";
-        public const string OutputFile = "output.txt";
+        public const string InputFile = "unsorted.txt";
+        public const string OutputFile = "sorted.txt";
     }
 }

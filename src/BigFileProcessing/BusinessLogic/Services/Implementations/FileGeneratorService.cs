@@ -17,7 +17,7 @@ namespace BusinessLogic.Services.Implementations
     {
         #region Private Members
 
-        private readonly BLI.IFileContentProvider _fileContentProvider;
+        private readonly BLI.IRowContentProvider _rowContentProvider;
         private readonly IOptions<INF.GeneratorOptions> _generatorOptions;
 
         #endregion
@@ -25,10 +25,10 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Constructors
-        public FileGeneratorService(BLI.IFileContentProvider fileContentProvider, 
+        public FileGeneratorService(BLI.IRowContentProvider rowContentProvider,
                                     IOptions<INF.GeneratorOptions> generatorOptions)
         {
-            _fileContentProvider = fileContentProvider;
+            _rowContentProvider = rowContentProvider;
             _generatorOptions = generatorOptions;
         }
 
@@ -39,14 +39,18 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
 
         public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync()
-        {
-            string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
-            int number = 0;
-            Stopwatch stopwatch = new Stopwatch();
+        {                       
+            var process = Process.GetCurrentProcess();
 
             try
             {
-                stopwatch.Start();
+                long before = process.WorkingSet64;
+
+                var stopwatch = Stopwatch.StartNew();
+
+                string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
+                long number = 0;
+                long writtenBytes = 0;
 
                 if (File.Exists(fileName) == true)
                 { 
@@ -58,20 +62,35 @@ namespace BusinessLogic.Services.Implementations
                                                         encoding: Encoding.UTF8,
                                                         bufferSize: 65536))
                 {
-                    var response = _fileContentProvider.Generate();
+                    while (true)
+                    {
+                        var row = _rowContentProvider.Generate();
 
-                    await writer.WriteLineAsync(response.Content);
+                        long rowBytes = Encoding.UTF8.GetByteCount(row) + 1;
 
-                    number = response.TotalRecords;
+                        if (writtenBytes + rowBytes > _generatorOptions.Value.MaxFileSize)
+                        {
+                            break;
+                        }
+
+                        await writer.WriteLineAsync(row);
+
+                        number++;
+                        writtenBytes += rowBytes;
+                    }
                 }
 
                 stopwatch.Stop();
 
+                long after = process.WorkingSet64;
+
                 var output = new BLO.FileGenerationResponse()
                 {
                     FileName = fileName,
-                    NumberOfRecords = number, 
-                    ElapsedTime = stopwatch.ElapsedMilliseconds
+                    TotalRecords = number, 
+                    ElapsedTime = stopwatch.ElapsedMilliseconds,
+                    UsedMemory = after - before,
+                    SavedContentSize = writtenBytes
                 };
 
                 return BLO.Result<BLO.FileGenerationResponse>.Success(output);

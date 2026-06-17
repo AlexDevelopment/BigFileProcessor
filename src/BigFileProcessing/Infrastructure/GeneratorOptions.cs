@@ -11,7 +11,7 @@
 
 
         #region Public properties
-        public required int NumberOfRecords { get; set; }
+        public required long MaxFileSize { get; set; }
 
         #endregion
     }

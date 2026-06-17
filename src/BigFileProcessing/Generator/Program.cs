@@ -22,7 +22,6 @@ services.AddOptions<INF.GeneratorOptions>()
     .ValidateDataAnnotations();
 
 services.AddSingleton<BSI.IFileGeneratorService, BSIM.FileGeneratorService>();
-services.AddSingleton<BSI.IFileContentProvider, BSIM.FileContentProvider>();
 services.AddSingleton<BSI.IRowContentProvider, BSIM.SimpleRowContentProvider>();
 
 var serviceProvider = services.BuildServiceProvider();
@@ -39,8 +38,10 @@ if (result.IsSuccess == true)
 {
     Console.WriteLine("file generation completed");
     Console.WriteLine($"file name: {result.Response.FileName}");
-    Console.WriteLine($"number of records: {result.Response.NumberOfRecords}");
-    Console.WriteLine($"elapsed time: {result.Response.ElapsedTime} ms");
+    Console.WriteLine($"number of records: {result.Response.TotalRecords:N0}");
+    Console.WriteLine($"elapsed time: {result.Response.ElapsedTime:N0} ms");
+    Console.WriteLine($"used memory: {result.Response.UsedMemory:N0} bytes");
+    Console.WriteLine($"save content size: {result.Response.SavedContentSize/1024.0/1024.0:N0} MB");
 }
 else
 {
