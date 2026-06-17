@@ -38,8 +38,9 @@ var result = await service.GenerateAsync();
 if (result.IsSuccess == true)
 {
     Console.WriteLine("file generation completed");
-    Console.WriteLine($"file Name: {result.Response.FileName}");
-    Console.WriteLine($"number of Records: {result.Response.NumberOfRecords}");
+    Console.WriteLine($"file name: {result.Response.FileName}");
+    Console.WriteLine($"number of records: {result.Response.NumberOfRecords}");
+    Console.WriteLine($"elapsed time: {result.Response.ElapsedTime} ms");
 }
 else
 {

@@ -1,19 +1,23 @@
 ﻿using System.Text;
+using System.Diagnostics;
 
 using Microsoft.Extensions.Options;
 
-using BusinessLogic.Objects;
-using BusinessLogic.Services.Interfaces;
+using BLO = BusinessLogic.Objects;
+using BLI = BusinessLogic.Services.Interfaces;
+using BLC = BusinessLogic.Constants;
 
 using INF = Infrastructure;
 
+
+
 namespace BusinessLogic.Services.Implementations
 {
-    public class FileGeneratorService : IFileGeneratorService
+    public class FileGeneratorService : BLI.IFileGeneratorService
     {
         #region Private Members
 
-        private readonly IFileContentProvider _fileContentProvider;
+        private readonly BLI.IFileContentProvider _fileContentProvider;
         private readonly IOptions<INF.GeneratorOptions> _generatorOptions;
 
         #endregion
@@ -21,7 +25,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Constructors
-        public FileGeneratorService(IFileContentProvider fileContentProvider, 
+        public FileGeneratorService(BLI.IFileContentProvider fileContentProvider, 
                                     IOptions<INF.GeneratorOptions> generatorOptions)
         {
             _fileContentProvider = fileContentProvider;
@@ -34,13 +38,16 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public async Task<Result<FileGenerationResponse>> GenerateAsync()
+        public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync()
         {
-            string fileName = $"{_generatorOptions.Value.Folder}\\not_sorted" + $".txt";
+            string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
             int number = 0;
+            Stopwatch stopwatch = new Stopwatch();
 
             try
             {
+                stopwatch.Start();
+
                 if (File.Exists(fileName) == true)
                 { 
                     File.Delete(fileName);
@@ -58,17 +65,20 @@ namespace BusinessLogic.Services.Implementations
                     number = response.TotalRecords;
                 }
 
-                var output = new FileGenerationResponse()
+                stopwatch.Stop();
+
+                var output = new BLO.FileGenerationResponse()
                 {
                     FileName = fileName,
-                    NumberOfRecords = number
+                    NumberOfRecords = number, 
+                    ElapsedTime = stopwatch.ElapsedMilliseconds
                 };
 
-                return Result<FileGenerationResponse>.Success(output);
+                return BLO.Result<BLO.FileGenerationResponse>.Success(output);
             }
             catch (Exception ex)
             {
-                return Result<FileGenerationResponse>.Failure(ex);
+                return BLO.Result<BLO.FileGenerationResponse>.Failure(ex);
             }
         }
 

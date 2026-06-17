@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLogic.Objects
 {
-    public class Result<T> where T : IResponse
+    public class Result<T> where T : IServiceResponse
     {
         #region Private members
 
@@ -19,11 +19,18 @@ namespace BusinessLogic.Objects
 
         #region Constructors
 
-        private Result(bool isSuccess, Exception? error, T? response)
+        private Result(T response)
         {
-            _isSuccess = isSuccess;
-            _error = error;
+            _isSuccess = true;
+            _error = null;
             _response = response;
+        }
+
+        private Result(Exception? error)
+        {
+            _isSuccess = false;
+            _error = error;
+            _response = default;
         }
 
         #endregion
@@ -44,12 +51,12 @@ namespace BusinessLogic.Objects
 
         public static Result<T> Success(T response)
         {
-            return new Result<T>(true, error: null, response: response);
+            return new Result<T>(response);
         }
 
         public static Result<T> Failure(Exception error)
         {
-            return new Result<T>(false, error: error, response: default);
+            return new Result<T>(error);
         }
 
         #endregion

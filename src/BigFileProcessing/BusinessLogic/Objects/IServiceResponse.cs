@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace BusinessLogic.Objects
 {
-    public interface IResponse
+    public interface IServiceResponse
     {
+        long ElapsedTime { get; init; }
     }
 }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace BusinessLogic.Objects
 {
-    public record FileGenerationResponse : IResponse
+    public record FileGenerationResponse : IServiceResponse
     {
         public required string FileName { get; init; }
-        public int NumberOfRecords { get; init; }
+        public required int NumberOfRecords { get; init; }
+        public required long ElapsedTime { get; init; }
     }
 }

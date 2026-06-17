@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLogic.Objects
 {
-    public record FileContentGenerationResponse : IResponse
+    public record FileContentGenerationResponse
     {
         public int TotalRecords { get; init; } = 0;
         public string Content { get; init; } = string.Empty;
