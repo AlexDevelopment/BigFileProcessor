@@ -10,16 +10,16 @@ namespace BusinessLogic.Objects
     {
         #region Private members
 
-        private bool _isSuccess;
-        private string _error;
-        private T _response;
+        private bool _isSuccess = false;
+        private Exception? _error;
+        private T? _response;
 
         #endregion
 
 
         #region Constructors
 
-        private Result(bool isSuccess, string error = null, T response = default)
+        private Result(bool isSuccess, Exception? error, T? response)
         {
             _isSuccess = isSuccess;
             _error = error;
@@ -33,8 +33,8 @@ namespace BusinessLogic.Objects
         #region Public Properties
 
         public bool IsSuccess => _isSuccess;
-        public string Error => _error;
-        public T Response => _response;
+        public Exception? Error => _error;
+        public T? Response => _response;
 
         #endregion
 
@@ -44,12 +44,12 @@ namespace BusinessLogic.Objects
 
         public static Result<T> Success(T response)
         {
-            return new Result<T>(true, response: response);
+            return new Result<T>(true, error: null, response: response);
         }
 
-        public static Result<T> Failure(string error)
+        public static Result<T> Failure(Exception error)
         {
-            return new Result<T>(false, error: error);
+            return new Result<T>(false, error: error, response: default);
         }
 
         #endregion

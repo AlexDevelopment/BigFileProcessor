@@ -9,6 +9,6 @@ namespace BusinessLogic.Services.Interfaces
 {
     public interface IFileGeneratorService
     {
-        Task<Result<FileGenerationResponse>> GenerateAsync(FileGenerationRequest request);
+        Task<Result<FileGenerationResponse>> GenerateAsync();
     }
 }

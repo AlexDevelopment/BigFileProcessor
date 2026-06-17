@@ -30,15 +30,10 @@ var serviceProvider = services.BuildServiceProvider();
 var service = serviceProvider.GetRequiredService<BSI.IFileGeneratorService>();
 var options = serviceProvider.GetRequiredService<IOptions<INF.GeneratorOptions>>();
 
+Console.WriteLine($"output folder: {options.Value.Folder}\n\n");
 Console.WriteLine("start file generation...\n");
-Console.WriteLine($"Output folder: {options.Value.Folder}\n");
 
-var request = new BLO.FileGenerationRequest() 
-{ 
-    NumberOfRecords = 100000000
-};
-
-var result = await service.GenerateAsync(request);
+var result = await service.GenerateAsync();
 
 if (result.IsSuccess == true)
 {

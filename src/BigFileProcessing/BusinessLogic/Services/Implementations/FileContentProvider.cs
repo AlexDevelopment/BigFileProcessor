@@ -1,8 +1,8 @@
 ﻿
+using BusinessLogic.Objects;
 using Microsoft.Extensions.Options;
-
-using INF = Infrastructure;
 using BSI = BusinessLogic.Services.Interfaces;
+using INF = Infrastructure;
 
 
 namespace BusinessLogic.Services.Implementations
@@ -32,7 +32,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public string Generate()
+        public FileContentGenerationResponse Generate()
         {
             var rows = new List<string>();
 
@@ -43,8 +43,11 @@ namespace BusinessLogic.Services.Implementations
                 rows.Add(row);
             }
 
-            return string.Join(Environment.NewLine, rows);
-
+            return new FileContentGenerationResponse
+            {
+                Content = string.Join(Environment.NewLine, rows),
+                TotalRecords = rows.Count
+            };
         }
 
         #endregion  

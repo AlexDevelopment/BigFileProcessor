@@ -34,27 +34,42 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public Task<Result<FileGenerationResponse>> GenerateAsync(FileGenerationRequest request)
+        public async Task<Result<FileGenerationResponse>> GenerateAsync()
         {
             string fileName = $"{_generatorOptions.Value.Folder}\\not_sorted" + $".txt";
+            int number = 0;
 
-            using (var writer = new StreamWriter(fileName,
-                                                    append: false,
-                                                    encoding: Encoding.UTF8,
-                                                    bufferSize: 65536))
+            try
             {
-                var content = _fileContentProvider.Generate();
+                if (File.Exists(fileName) == true)
+                { 
+                    File.Delete(fileName);
+                }
 
-                writer.WriteLine(content);
+                using (var writer = new StreamWriter(fileName,
+                                                        append: false,
+                                                        encoding: Encoding.UTF8,
+                                                        bufferSize: 65536))
+                {
+                    var response = _fileContentProvider.Generate();
+
+                    await writer.WriteLineAsync(response.Content);
+
+                    number = response.TotalRecords;
+                }
+
+                var output = new FileGenerationResponse()
+                {
+                    FileName = fileName,
+                    NumberOfRecords = number
+                };
+
+                return Result<FileGenerationResponse>.Success(output);
             }
-
-            var response = new FileGenerationResponse()
+            catch (Exception ex)
             {
-                FileName = fileName,
-                NumberOfRecords = request.NumberOfRecords
-            };
-
-            return Task.FromResult(Result<FileGenerationResponse>.Success(response));
+                return Result<FileGenerationResponse>.Failure(ex);
+            }
         }
 
         #endregion
