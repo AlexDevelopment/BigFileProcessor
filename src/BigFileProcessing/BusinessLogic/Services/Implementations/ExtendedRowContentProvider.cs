@@ -31,12 +31,11 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
         public string Generate()
         {
-            int i = _random.Next(0, 9);
-
             var strings = _generatorOptions.Value.Strings;
             var ints = _generatorOptions.Value.Numbers;
 
-            int j = _random.Next(0, strings.Length-1);
+            int i = _random.Next(0, ints.Length - 1);
+            int j = _random.Next(0, strings.Length - 1);
 
             return $"{ints[i]}.{strings[j]}";
         }
