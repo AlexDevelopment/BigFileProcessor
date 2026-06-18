@@ -7,21 +7,11 @@ using BLO = BusinessLogic.Objects;
 using BSIM = BusinessLogic.Services.Implementations;
 using INF = Infrastructure;
 
+using Sorter;
 
 var services = new ServiceCollection();
 
-IConfiguration configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile("appsettings.Development.json", optional: true)
-    .AddEnvironmentVariables()
-    .Build();
-
-services.AddOptions<INF.SorterOptions>()
-    .Bind(configuration.GetSection(INF.SorterOptions.SectionName))
-    .ValidateDataAnnotations();
-
-services.AddSingleton<BSI.IFileSorterService, BSIM.FileSorterService>();
+services.AddFileSortingServices();
 
 var serviceProvider = services.BuildServiceProvider();
 
@@ -36,7 +26,8 @@ var result = await service.SortAsync();
 if (result.IsSuccess == true)
 {
     Console.WriteLine("file sorting completed");
-    Console.WriteLine($"elapsed time: {result.Response?.ElapsedTime} ms");
+    Console.WriteLine($"elapsed time: {result.Response?.ElapsedTime:N0} ms");
+    Console.WriteLine($"total files: {result.Response?.TotalFiles:N0}");
 }
 else
 {

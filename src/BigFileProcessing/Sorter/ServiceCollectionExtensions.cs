@@ -7,11 +7,11 @@ using BSI = BusinessLogic.Services.Interfaces;
 using BSIM = BusinessLogic.Services.Implementations;
 
 
-namespace Generator
+namespace Sorter
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddFileGenerationServices(
+        public static IServiceCollection AddFileSortingServices(
             this IServiceCollection services)
         {
             IConfiguration configuration = new ConfigurationBuilder()
@@ -21,12 +21,12 @@ namespace Generator
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddOptions<INF.GeneratorOptions>()
-                .Bind(configuration.GetSection(INF.GeneratorOptions.SectionName))
+            services.AddOptions<INF.SorterOptions>()
+                .Bind(configuration.GetSection(INF.SorterOptions.SectionName))
                 .ValidateDataAnnotations();
 
-            services.AddSingleton<BSI.IFileGeneratorService, BSIM.FileGeneratorService>();
-            services.AddSingleton<BSI.IRowContentProvider, BSIM.RowContentProvider>();
+            services.AddSingleton<BSI.IFileSorterService, BSIM.FileSorterService>();
+            services.AddSingleton<BSI.IFileSplitter, BSIM.FileSplitter>();
 
             return services;
         }

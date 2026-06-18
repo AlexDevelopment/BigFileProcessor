@@ -11,7 +11,7 @@
 
 
         #region Public properties
-        public required int NumberOfChunks { get; set; }
+        public required int MaxChunkSize { get; set; }
 
         #endregion
     }

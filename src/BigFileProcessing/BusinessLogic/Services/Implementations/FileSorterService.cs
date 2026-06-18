@@ -16,40 +16,47 @@ namespace BusinessLogic.Services.Implementations
         #region Private Members
         
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
+        private readonly BLI.IFileSplitter _splitter;
 
         #endregion
 
 
 
         #region Constructors
-        public FileSorterService(IOptions<INF.SorterOptions> sorterOptions)
+        public FileSorterService(IOptions<INF.SorterOptions> sorterOptions, 
+                                    BLI.IFileSplitter splitter)
         {
             _sorterOptions = sorterOptions;
+            _splitter = splitter;
         }
 
         #endregion
 
 
+
+        #region Public Methods
         public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
         {
             string inputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}";
             string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
 
-            Stopwatch stopwatch = new Stopwatch();
             try
             {
-                stopwatch.Start();
+                var stopwatch = Stopwatch.StartNew();
 
                 if (File.Exists(outputFileName) == true)
                 {
                     File.Delete(outputFileName);
-                }
+                }                
+
+                var files = await _splitter.SplitInputFileAsync();
 
                 stopwatch.Stop();
 
                 var output = new BLO.FileSortResponse()
                 {
-                    ElapsedTime = stopwatch.ElapsedMilliseconds
+                    ElapsedTime = stopwatch.ElapsedMilliseconds,
+                    TotalFiles = files.Count
                 };
 
                 return BLO.Result<BLO.FileSortResponse>.Success(output);
@@ -59,5 +66,7 @@ namespace BusinessLogic.Services.Implementations
                 return BLO.Result<BLO.FileSortResponse>.Failure(ex);
             }
         }
+
+        #endregion
     }
 }
