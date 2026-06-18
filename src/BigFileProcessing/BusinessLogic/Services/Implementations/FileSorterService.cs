@@ -37,12 +37,16 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
         public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
         {
-            string inputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}";
-            string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
+            var process = Process.GetCurrentProcess();
 
             try
             {
+                long before = process.WorkingSet64;
+
                 var stopwatch = Stopwatch.StartNew();
+
+                string inputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}";
+                string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
 
                 if (File.Exists(outputFileName) == true)
                 {
@@ -53,9 +57,12 @@ namespace BusinessLogic.Services.Implementations
 
                 stopwatch.Stop();
 
+                long after = process.WorkingSet64;
+
                 var output = new BLO.FileSortResponse()
                 {
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
+                    UsedMemory = after - before,
                     TotalFiles = files.Count
                 };
 

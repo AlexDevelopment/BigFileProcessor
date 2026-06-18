@@ -17,6 +17,7 @@ namespace BusinessLogic.Services.Implementations
         #region Private Members
 
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
+        private readonly BLI.IRowDataParser _parser;
 
         #endregion
 
@@ -24,9 +25,10 @@ namespace BusinessLogic.Services.Implementations
 
         #region Constructors
 
-        public FileSplitter(IOptions<INF.SorterOptions> sorterOptions)
+        public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, BLI.IRowDataParser parser)
         {
             _sorterOptions = sorterOptions;
+            _parser = parser;
         }
 
         #endregion
@@ -61,16 +63,14 @@ namespace BusinessLogic.Services.Implementations
                         continue; 
                     }
 
-                    var row = new BLO.RowData
-                    (
-                        Number: int.Parse(line.Split('.')[0]),
-                        Text: line.Split('.')[1]
-                    );
+                    var row = _parser.Parse(line);
 
                     long rowSize = Encoding.UTF8.GetByteCount(row.ToString()) + 1;
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
                     {
+                        fileContent = fileContent.OrderBy(r => r.Text).ThenBy(r => r.Number).ToList();
+
                         await writer.WriteAsync(string.Join(Environment.NewLine, fileContent.Select(r => r.ToString())));
 
                         await writer.DisposeAsync();
@@ -90,6 +90,8 @@ namespace BusinessLogic.Services.Implementations
                     fileContent.Add(row);
                     currentFileSize += rowSize;
                 }
+
+                fileContent = fileContent.OrderBy(r => r.Text).ThenBy(r => r.Number).ToList();
 
                 if (fileContent.Count > 0)
                 { 

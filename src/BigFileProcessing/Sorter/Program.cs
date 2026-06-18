@@ -28,6 +28,7 @@ if (result.IsSuccess == true)
     Console.WriteLine("file sorting completed");
     Console.WriteLine($"elapsed time: {result.Response?.ElapsedTime:N0} ms");
     Console.WriteLine($"total files: {result.Response?.TotalFiles:N0}");
+    Console.WriteLine($"used memory: {result.Response?.UsedMemory:N0} bytes");
 }
 else
 {
