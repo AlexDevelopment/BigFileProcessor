@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLogic.Objects
 {
-    public record RowData(int Number, string Text)
+    public record struct RowData(int Number, string Text)
     {
         public override string ToString() => $"{Number}.{Text}";        
     }

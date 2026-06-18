@@ -68,10 +68,13 @@ namespace BusinessLogic.Services.Implementations
                     long rowSize = Encoding.UTF8.GetByteCount(row.ToString()) + 1;
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
-                    {
-                        fileContent = fileContent.OrderBy(r => r.Text).ThenBy(r => r.Number).ToList();
+                    {                        
+                        fileContent.Sort(new RowDataComparer());
 
-                        await writer.WriteAsync(string.Join(Environment.NewLine, fileContent.Select(r => r.ToString())));
+                        foreach (var item in fileContent)
+                        {
+                            await writer.WriteLineAsync(item.ToString());
+                        }                        
 
                         await writer.DisposeAsync();
                         writer.Close();
@@ -90,12 +93,15 @@ namespace BusinessLogic.Services.Implementations
                     fileContent.Add(row);
                     currentFileSize += rowSize;
                 }
-
-                fileContent = fileContent.OrderBy(r => r.Text).ThenBy(r => r.Number).ToList();
+                
+                fileContent.Sort(new RowDataComparer());
 
                 if (fileContent.Count > 0)
-                { 
-                    await writer.WriteAsync(string.Join(Environment.NewLine, fileContent.Select(r => r.ToString())));
+                {
+                    foreach (var item in fileContent)
+                    {
+                        await writer.WriteLineAsync(item.ToString());
+                    }
                 }
 
                 await writer.DisposeAsync();
