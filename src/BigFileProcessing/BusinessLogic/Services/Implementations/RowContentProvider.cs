@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Options;
 
 using BSI = BusinessLogic.Services.Interfaces;
+using BLO = BusinessLogic.Objects;
 
 using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
-    public class ExtendedRowContentProvider : BSI.IRowContentProvider
+    public class RowContentProvider : BSI.IRowContentProvider
     {
         #region Private Members
 
@@ -19,7 +20,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Constructor
 
-        public ExtendedRowContentProvider(IOptions<INF.GeneratorOptions> generatorOptions)
+        public RowContentProvider(IOptions<INF.GeneratorOptions> generatorOptions)
         { 
             _generatorOptions = generatorOptions;
         }
@@ -29,7 +30,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public string Generate()
+        public BLO.RowData Generate()
         {
             var strings = _generatorOptions.Value.Strings;
             var ints = _generatorOptions.Value.Numbers;
@@ -37,7 +38,7 @@ namespace BusinessLogic.Services.Implementations
             int i = _random.Next(0, ints.Length - 1);
             int j = _random.Next(0, strings.Length - 1);
 
-            return $"{ints[i]}.{strings[j]}";
+            return new BLO.RowData(Number: ints[i], Text: strings[j]);
         }
 
         #endregion

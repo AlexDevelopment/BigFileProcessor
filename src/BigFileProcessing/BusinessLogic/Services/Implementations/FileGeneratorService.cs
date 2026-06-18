@@ -66,14 +66,14 @@ namespace BusinessLogic.Services.Implementations
                     {
                         var row = _rowContentProvider.Generate();
 
-                        long rowBytes = Encoding.UTF8.GetByteCount(row) + 1;
+                        long rowBytes = Encoding.UTF8.GetByteCount(row.ToString()) + 1;
 
                         if (writtenBytes + rowBytes > _generatorOptions.Value.MaxFileSize)
                         {
                             break;
                         }
 
-                        await writer.WriteLineAsync(row);
+                        await writer.WriteLineAsync(row.ToString());
 
                         number++;
                         writtenBytes += rowBytes;

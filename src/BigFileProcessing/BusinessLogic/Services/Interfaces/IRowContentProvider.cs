@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BLO = BusinessLogic.Objects;
 
 namespace BusinessLogic.Services.Interfaces
 {
     public interface IRowContentProvider
     {
-        string Generate();
+        BLO.RowData Generate();
     }
 }
