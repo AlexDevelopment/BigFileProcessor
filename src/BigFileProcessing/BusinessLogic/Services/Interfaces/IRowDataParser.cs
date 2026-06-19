@@ -4,6 +4,6 @@ namespace BusinessLogic.Services.Interfaces
 {
     public interface IRowDataParser
     {
-        BLO.RowData Parse(string line);
+        BLO.RowData? Parse(string line);
     }
 }

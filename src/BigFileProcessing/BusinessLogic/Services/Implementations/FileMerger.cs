@@ -62,7 +62,14 @@ namespace BusinessLogic.Services.Implementations
 
                     var row = _rowDataParser.Parse(line);
 
-                    queue.Enqueue(new QueueItem(Row: row, ReaderIndex: i), row);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    BLO.RowData realRow = (BLO.RowData)row;
+
+                    queue.Enqueue(new QueueItem(Row: realRow, ReaderIndex: i), realRow);
                 }
 
                 while (queue.Count > 0)
@@ -77,7 +84,14 @@ namespace BusinessLogic.Services.Implementations
                     {
                         var row = _rowDataParser.Parse(nextLine);
 
-                        queue.Enqueue(new QueueItem(Row: row, ReaderIndex: item.ReaderIndex), row);
+                        if (row == null)
+                        {
+                            continue;
+                        }
+
+                        BLO.RowData realRow = (BLO.RowData)row;
+
+                        queue.Enqueue(new QueueItem(Row: realRow, ReaderIndex: item.ReaderIndex), realRow);
                     }
                 }
             }

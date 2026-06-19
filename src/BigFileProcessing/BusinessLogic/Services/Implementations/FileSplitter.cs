@@ -65,7 +65,14 @@ namespace BusinessLogic.Services.Implementations
 
                     var row = _parser.Parse(line);
 
-                    long rowSize = Encoding.UTF8.GetByteCount(row.ToString()) + 1;
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    BLO.RowData realRow = (BLO.RowData)row;
+
+                    long rowSize = Encoding.UTF8.GetByteCount(realRow.ToString()) + 1;
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
                     {                        
@@ -90,7 +97,7 @@ namespace BusinessLogic.Services.Implementations
                         writer = new StreamWriter(chunkFileName, false, Encoding.UTF8);
                     }
 
-                    fileContent.Add(row);
+                    fileContent.Add(realRow);
                     currentFileSize += rowSize;
                 }
                 
