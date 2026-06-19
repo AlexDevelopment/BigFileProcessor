@@ -37,6 +37,7 @@ namespace Sorter
             services.AddSingleton<BSI.IFileSorterService, BSIM.FileSorterService>();
             services.AddSingleton<BSI.IFileSplitter, BSIM.FileSplitter>();
             services.AddSingleton<BSI.IFileMerger, BSIM.FileMerger>();
+            services.AddSingleton<BSI.IFileDeleter, BSIM.FileDeleter>();
             services.AddSingleton<BSI.IRowDataParser, BSIM.RowDataParser>();
 
             return services;

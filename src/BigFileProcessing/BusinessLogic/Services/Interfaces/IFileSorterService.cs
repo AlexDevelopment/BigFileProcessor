@@ -5,6 +5,6 @@ namespace BusinessLogic.Services.Interfaces
 {
     public interface IFileSorterService
     {
-        BLO.Result<BLO.FileSortResponse> Sort();
+        Task<BLO.Result<BLO.FileSortResponse>> SortAsync();
     }
 }

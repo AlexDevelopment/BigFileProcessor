@@ -40,13 +40,13 @@ namespace BusinessLogic.Services.Implementations
         {
             StreamWriter writer = new StreamWriter(
                                         $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}",
-                                        false, Encoding.UTF8, 262144);
+                                        false, Encoding.UTF8, BLC.StreamBuffers.WriteBufferSize);
 
             try
             { 
                 foreach (var file in files)
                 {
-                    _readers.Add(new StreamReader(file, Encoding.UTF8, false, 262144));
+                    _readers.Add(new StreamReader(file, Encoding.UTF8, false, BLC.StreamBuffers.ReadBufferSize));
                 }
 
                 var queue = new PriorityQueue<BLO.QueueItem, BLO.RowData>(new RowDataComparer());

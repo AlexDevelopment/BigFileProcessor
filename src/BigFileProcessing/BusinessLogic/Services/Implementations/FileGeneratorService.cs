@@ -63,7 +63,7 @@ namespace BusinessLogic.Services.Implementations
                 using (var writer = new StreamWriter(fileName,
                                                         append: false,
                                                         encoding: Encoding.UTF8,
-                                                        bufferSize: 65536))
+                                                        bufferSize: BLC.StreamBuffers.WriteBufferSize))
                 {
                     while (true)
                     {

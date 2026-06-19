@@ -2,13 +2,12 @@
 
 using Microsoft.Extensions.Options;
 
-using BLI = BusinessLogic.Services.Interfaces;
-using BLC = BusinessLogic.Constants;
-using BLO = BusinessLogic.Objects;
-
-using INF = Infrastructure;
-
 using BusinessLogic.Extensions;
+
+using BLC = BusinessLogic.Constants;
+using BLI = BusinessLogic.Services.Interfaces;
+using BLO = BusinessLogic.Objects;
+using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
@@ -50,10 +49,12 @@ namespace BusinessLogic.Services.Implementations
                 chunkFileName
             };
 
-            StreamWriter writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 262144);
+            StreamWriter writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 
+                                                    BLC.StreamBuffers.WriteBufferSize);
 
             using (var reader = new StreamReader($"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}", 
-                                                                                    Encoding.UTF8, false, 262144))
+                                                                  Encoding.UTF8, false, 
+                                                                  BLC.StreamBuffers.ReadBufferSize))
             {
                 string? line;
 
@@ -82,7 +83,7 @@ namespace BusinessLogic.Services.Implementations
 
                         output.Add(chunkFileName);
 
-                        writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 262144);
+                        writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, BLC.StreamBuffers.WriteBufferSize);
                     }
 
                     fileContent.Add(realRow);

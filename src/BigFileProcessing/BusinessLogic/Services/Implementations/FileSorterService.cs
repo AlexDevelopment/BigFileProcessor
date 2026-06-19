@@ -18,6 +18,7 @@ namespace BusinessLogic.Services.Implementations
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
         private readonly BLI.IFileSplitter _splitter;
         private readonly BLI.IFileMerger _merger;
+        private readonly BLI.IFileDeleter _deleter;
         private readonly ILogger<FileSorterService> _logger;
 
         #endregion
@@ -28,11 +29,13 @@ namespace BusinessLogic.Services.Implementations
         public FileSorterService(IOptions<INF.SorterOptions> sorterOptions, 
                                     BLI.IFileSplitter splitter,
                                     BLI.IFileMerger merger,
+                                    BLI.IFileDeleter deleter,
                                     ILogger<FileSorterService> logger)
         {
             _sorterOptions = sorterOptions;
             _splitter = splitter;
             _merger = merger;
+            _deleter = deleter;
             _logger = logger;
         }
 
@@ -41,7 +44,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public BLO.Result<BLO.FileSortResponse> Sort()
+        public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
         {
             var process = Process.GetCurrentProcess();
 
@@ -84,10 +87,19 @@ namespace BusinessLogic.Services.Implementations
                 {
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
                     UsedMemory = after - before,
-                    TotalFiles = files.Count
+                    TotalFiles = files.Count,
+                    OutputFileName = outputFileName
                 };
 
                 _logger.LogInformation("file sort operation completed successfully. {Output}", output.ToLog());
+
+                //the file deletion is outside of time measurement, as it is not part of the sorting operation
+
+                _logger.LogInformation("starting file delete operation...");
+
+                await _deleter.DeleteFilesAsync(files);
+
+                _logger.LogInformation("file delete operation completed successfully.");
 
                 return BLO.Result<BLO.FileSortResponse>.Success(output);
             }
