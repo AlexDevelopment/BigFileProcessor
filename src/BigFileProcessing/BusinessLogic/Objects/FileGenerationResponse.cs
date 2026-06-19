@@ -21,7 +21,7 @@ namespace BusinessLogic.Objects
         {
             var minutes = TimeSpan.FromMilliseconds(ElapsedTime).TotalMinutes;
 
-            return $"\nelapsed time: {ElapsedTime:N0} ms / {minutes:N2} min\nused memory: {UsedMemory:N0} bytes\ntotal records: {TotalRecords:N0}\nsaved content size: {SavedContentSize:N0} bytes\nfile name: {FileName}\n";
+            return $"\nelapsed time: {ElapsedTime:N0} ms / {minutes:N2} min\nused memory: {UsedMemory:N0} bytes\ntotal records: {TotalRecords:N0}\nsaved content size: {SavedContentSize:N0} bytes\nfile name: {FileName}";
         }
 
         #endregion

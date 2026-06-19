@@ -90,9 +90,7 @@ namespace BusinessLogic.Services.Implementations
                     TotalFiles = files.Count,
                     OutputFileName = outputFileName
                 };
-
-                _logger.LogInformation("file sort operation completed successfully. {Output}", output.ToLog());
-
+                
                 //the file deletion is outside of time measurement, as it is not part of the sorting operation
 
                 _logger.LogInformation("starting file delete operation...");
@@ -100,6 +98,8 @@ namespace BusinessLogic.Services.Implementations
                 await _deleter.DeleteFilesAsync(files);
 
                 _logger.LogInformation("file delete operation completed successfully.");
+
+                _logger.LogInformation("file sort operation completed successfully. {Output}", output.ToLog());
 
                 return BLO.Result<BLO.FileSortResponse>.Success(output);
             }
