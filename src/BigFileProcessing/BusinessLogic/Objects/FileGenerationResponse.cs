@@ -19,7 +19,9 @@ namespace BusinessLogic.Objects
 
         public string ToLog()
         {
-            return $"\nelapsed time: {ElapsedTime} ms\nused memory: {UsedMemory} bytes\ntotal records: {TotalRecords}\nsaved content size: {SavedContentSize} bytes\nfile name: {FileName}\n";
+            var minutes = TimeSpan.FromMilliseconds(ElapsedTime).TotalMinutes;
+
+            return $"\nelapsed time: {ElapsedTime:N0} ms / {minutes:N2} min\nused memory: {UsedMemory:N0} bytes\ntotal records: {TotalRecords:N0}\nsaved content size: {SavedContentSize:N0} bytes\nfile name: {FileName}\n";
         }
 
         #endregion
