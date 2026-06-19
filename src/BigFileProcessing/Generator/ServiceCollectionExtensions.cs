@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 using INF = Infrastructure;
 
@@ -24,6 +26,13 @@ namespace Generator
             services.AddOptions<INF.GeneratorOptions>()
                 .Bind(configuration.GetSection(INF.GeneratorOptions.SectionName))
                 .ValidateDataAnnotations();
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+                loggingBuilder.AddNLog("nlog.config");
+            });
 
             services.AddSingleton<BSI.IFileGeneratorService, BSIM.FileGeneratorService>();
             services.AddSingleton<BSI.IRowContentProvider, BSIM.RowContentProvider>();

@@ -1,12 +1,10 @@
-﻿using System.Text;
-using System.Diagnostics;
-
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using BLO = BusinessLogic.Objects;
-using BLI = BusinessLogic.Services.Interfaces;
+using System.Diagnostics;
+using System.Text;
 using BLC = BusinessLogic.Constants;
-
+using BLI = BusinessLogic.Services.Interfaces;
+using BLO = BusinessLogic.Objects;
 using INF = Infrastructure;
 
 
@@ -19,6 +17,7 @@ namespace BusinessLogic.Services.Implementations
 
         private readonly BLI.IRowContentProvider _rowContentProvider;
         private readonly IOptions<INF.GeneratorOptions> _generatorOptions;
+        private readonly ILogger<FileGeneratorService> _logger;
 
         #endregion
 
@@ -26,10 +25,12 @@ namespace BusinessLogic.Services.Implementations
 
         #region Constructors
         public FileGeneratorService(BLI.IRowContentProvider rowContentProvider,
-                                    IOptions<INF.GeneratorOptions> generatorOptions)
+                                    IOptions<INF.GeneratorOptions> generatorOptions, 
+                                    ILogger<FileGeneratorService> logger)
         {
             _rowContentProvider = rowContentProvider;
             _generatorOptions = generatorOptions;
+            _logger = logger;
         }
 
         #endregion
@@ -44,6 +45,8 @@ namespace BusinessLogic.Services.Implementations
 
             try
             {
+                _logger.LogInformation("starting file generation operation.");
+
                 long before = process.WorkingSet64;
 
                 var stopwatch = Stopwatch.StartNew();
@@ -93,10 +96,14 @@ namespace BusinessLogic.Services.Implementations
                     SavedContentSize = writtenBytes
                 };
 
+                _logger.LogInformation("file generation operation completed successfully. {FileGenerationResponse}", output.ToLog());
+
                 return BLO.Result<BLO.FileGenerationResponse>.Success(output);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "an error occurred during the file generation operation.");
+
                 return BLO.Result<BLO.FileGenerationResponse>.Failure(ex);
             }
         }

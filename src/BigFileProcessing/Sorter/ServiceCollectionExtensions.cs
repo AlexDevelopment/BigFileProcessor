@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 using INF = Infrastructure;
 
@@ -24,6 +26,13 @@ namespace Sorter
             services.AddOptions<INF.SorterOptions>()
                 .Bind(configuration.GetSection(INF.SorterOptions.SectionName))
                 .ValidateDataAnnotations();
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+                loggingBuilder.AddNLog("nlog.config");
+            });
 
             services.AddSingleton<BSI.IFileSorterService, BSIM.FileSorterService>();
             services.AddSingleton<BSI.IFileSplitter, BSIM.FakeFileSplitter /*BSIM.FileSplitter*/>();

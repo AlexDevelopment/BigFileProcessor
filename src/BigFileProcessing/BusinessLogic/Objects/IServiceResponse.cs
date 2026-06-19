@@ -10,5 +10,6 @@ namespace BusinessLogic.Objects
     {
         long ElapsedTime { get; init; }
         long UsedMemory { get; init; }
+        string ToLog();
     }
 }

@@ -1,13 +1,13 @@
-﻿
+﻿using System.Diagnostics;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using System.Diagnostics;
 
 using BLI = BusinessLogic.Services.Interfaces;
 using BLO = BusinessLogic.Objects;
 using BLC = BusinessLogic.Constants;
 using INF = Infrastructure;
+
 
 namespace BusinessLogic.Services.Implementations
 {
@@ -18,6 +18,7 @@ namespace BusinessLogic.Services.Implementations
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
         private readonly BLI.IFileSplitter _splitter;
         private readonly BLI.IFileMerger _merger;
+        private readonly ILogger<FileSorterService> _logger;
 
         #endregion
 
@@ -26,11 +27,13 @@ namespace BusinessLogic.Services.Implementations
         #region Constructors
         public FileSorterService(IOptions<INF.SorterOptions> sorterOptions, 
                                     BLI.IFileSplitter splitter,
-                                    BLI.IFileMerger merger)
+                                    BLI.IFileMerger merger,
+                                    ILogger<FileSorterService> logger)
         {
             _sorterOptions = sorterOptions;
             _splitter = splitter;
             _merger = merger;
+            _logger = logger;
         }
 
         #endregion
@@ -44,6 +47,8 @@ namespace BusinessLogic.Services.Implementations
 
             try
             {
+                _logger.LogInformation("starting file sort operation.");
+
                 long before = process.WorkingSet64;
 
                 var stopwatch = Stopwatch.StartNew();
@@ -71,10 +76,14 @@ namespace BusinessLogic.Services.Implementations
                     TotalFiles = files.Count
                 };
 
+                _logger.LogInformation("file sort operation completed successfully. {Output}", output.ToLog());
+
                 return BLO.Result<BLO.FileSortResponse>.Success(output);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "an error occurred during the file sort operation.");
+
                 return BLO.Result<BLO.FileSortResponse>.Failure(ex);
             }
         }

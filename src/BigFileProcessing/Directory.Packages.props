@@ -12,5 +12,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.9" />
+    <PackageVersion Include="NLog" Version="5.3.4" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="5.3.14" />
   </ItemGroup>
 </Project>

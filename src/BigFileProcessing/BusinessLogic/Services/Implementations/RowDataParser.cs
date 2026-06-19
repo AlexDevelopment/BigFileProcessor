@@ -17,6 +17,16 @@ namespace BusinessLogic.Services.Implementations
 
 
 
+        #region Constructor
+        public RowDataParser(ILogger<RowDataParser> logger)
+        {
+            _logger = logger;
+        }
+
+        #endregion
+
+
+
         #region Public Methods
         public BLO.RowData? Parse(string line)
         {
