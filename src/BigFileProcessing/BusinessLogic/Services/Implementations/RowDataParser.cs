@@ -32,31 +32,33 @@ namespace BusinessLogic.Services.Implementations
         {
             if (string.IsNullOrWhiteSpace(line) == true)
             {
-                _logger.LogError("input line cannot be null or whitespace.");
+                _logger.LogError("input line is null or whitespace.");
                 return null;
             }
 
-            var parts = line.Split('.');
+            int dotIndex = line.IndexOf('.');
 
-            if (parts.Length != 2)
+            if (dotIndex <= 0)
             {
-                _logger.LogError($"input line must contain exactly one '.' character. input line: '{line}'");
+                _logger.LogError("invalid format. input line: '{Line}'", line);
                 return null;
             }
 
-            if (int.TryParse(parts[0], out int number) == false)
+            if (int.TryParse(line.AsSpan(0, dotIndex), out int number) == false)
             {
-                _logger.LogError($"input line must start with a valid integer. input line: '{line}'");
+                _logger.LogError("input line does not start with a valid integer. input line: '{Line}'", line);
                 return null;
             }
 
-            if (string.IsNullOrWhiteSpace(parts[1]) == true)
+            string text = line[(dotIndex + 1)..];
+
+            if (string.IsNullOrWhiteSpace(text) == true)
             {
-                _logger.LogError($"input line must contain non-empty text after the '.' character. input line: '{line}'");
+                _logger.LogError("empty text part. input line: '{Line}'", line);
                 return null;
             }
 
-            return new BLO.RowData(Number: number, Text: parts[1].Trim());
+            return new BLO.RowData(Number: number, Text: text.Trim());
         }
 
         #endregion
