@@ -41,7 +41,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
+        public BLO.Result<BLO.FileSortResponse> Sort()
         {
             var process = Process.GetCurrentProcess();
 
@@ -72,7 +72,7 @@ namespace BusinessLogic.Services.Implementations
                 
                 _logger.LogInformation("starting file merge operation...");
 
-                await _merger.MergeFilesAsync(files);
+                _merger.MergeFiles(files);
 
                 _logger.LogInformation("file merge operation completed successfully.");
 

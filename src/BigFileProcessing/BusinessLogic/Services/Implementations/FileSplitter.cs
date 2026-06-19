@@ -8,7 +8,7 @@ using BLO = BusinessLogic.Objects;
 
 using INF = Infrastructure;
 
-
+using BusinessLogic.Extensions;
 
 namespace BusinessLogic.Services.Implementations
 {
@@ -50,9 +50,10 @@ namespace BusinessLogic.Services.Implementations
                 chunkFileName
             };
 
-            StreamWriter writer = new StreamWriter(chunkFileName, false, Encoding.UTF8);
+            StreamWriter writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 262144);
 
-            using (var reader = new StreamReader($"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}"))
+            using (var reader = new StreamReader($"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}", 
+                                                                                    Encoding.UTF8, false, 262144))
             {
                 string? line;
 
@@ -71,15 +72,7 @@ namespace BusinessLogic.Services.Implementations
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
                     {                        
-                        fileContent.Sort(new RowDataComparer());
-
-                        foreach (var item in fileContent)
-                        {
-                            writer.WriteLine(item.Output);
-                        }                        
-
-                        writer.Dispose();
-                        writer.Close();
+                        writer.SortWriteDispose(fileContent);
 
                         fileContent.Clear();
                         fileIndex++;
@@ -89,25 +82,14 @@ namespace BusinessLogic.Services.Implementations
 
                         output.Add(chunkFileName);
 
-                        writer = new StreamWriter(chunkFileName, false, Encoding.UTF8);
+                        writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 262144);
                     }
 
                     fileContent.Add(realRow);
                     currentFileSize += rowSize;
                 }
                 
-                fileContent.Sort(new RowDataComparer());
-
-                if (fileContent.Count > 0)
-                {
-                    foreach (var item in fileContent)
-                    {
-                        writer.WriteLine(item.Output);
-                    }
-                }
-
-                writer.Dispose();
-                writer.Close();
+                writer.SortWriteDispose(fileContent);
             }
 
             return output;

@@ -36,24 +36,24 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public async Task MergeFilesAsync(List<string> files)
+        public void MergeFiles(List<string> files)
         {
             StreamWriter writer = new StreamWriter(
                                         $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}",
-                                        false, Encoding.UTF8);
+                                        false, Encoding.UTF8, 262144);
 
             try
             { 
                 foreach (var file in files)
                 {
-                    _readers.Add(new StreamReader(file));
+                    _readers.Add(new StreamReader(file, Encoding.UTF8, false, 262144));
                 }
 
-                var queue = new PriorityQueue<QueueItem, BLO.RowData>(new RowDataComparer());
+                var queue = new PriorityQueue<BLO.QueueItem, BLO.RowData>(new RowDataComparer());
 
                 for (int i = 0; i < _readers.Count; i++)
                 {
-                    var line = await _readers[i].ReadLineAsync();
+                    var line = _readers[i].ReadLine();
 
                     if (line == null) 
                     { 
@@ -69,16 +69,16 @@ namespace BusinessLogic.Services.Implementations
 
                     BLO.RowData realRow = (BLO.RowData)row;
 
-                    queue.Enqueue(new QueueItem(Row: realRow, ReaderIndex: i), realRow);
+                    queue.Enqueue(new BLO.QueueItem(Row: realRow, ReaderIndex: i), realRow);
                 }
 
                 while (queue.Count > 0)
                 {
                     var item = queue.Dequeue();
 
-                    await writer.WriteLineAsync(item.Row.Output);
+                    writer.WriteLine(item.Row.Output);
 
-                    var nextLine = await _readers[item.ReaderIndex].ReadLineAsync();
+                    var nextLine = _readers[item.ReaderIndex].ReadLine();
 
                     if (nextLine != null)
                     {
@@ -91,7 +91,7 @@ namespace BusinessLogic.Services.Implementations
 
                         BLO.RowData realRow = (BLO.RowData)row;
 
-                        queue.Enqueue(new QueueItem(Row: realRow, ReaderIndex: item.ReaderIndex), realRow);
+                        queue.Enqueue(new BLO.QueueItem(Row: realRow, ReaderIndex: item.ReaderIndex), realRow);
                     }
                 }
             }
@@ -101,24 +101,15 @@ namespace BusinessLogic.Services.Implementations
             }
             finally
             {
-                if (writer != null)
-                {
-                    writer.Close();
-                    writer.Dispose();
-                }
+                writer?.Dispose();
 
                 foreach (var reader in _readers)
                 {
-                    reader.Dispose();
-                    reader.Close();
+                    reader?.Dispose();
                 }
             }
         }
 
-        #endregion
-
-
-        public record struct QueueItem(BLO.RowData Row, int ReaderIndex);
-        //public record struct LineComparison(string Text, int Number);
+        #endregion        
     }
 }

@@ -21,7 +21,7 @@ var options = serviceProvider.GetRequiredService<IOptions<INF.SorterOptions>>();
 Console.WriteLine($"input folder: {options.Value.Folder}\n\n");
 Console.WriteLine("start file sorting...\n");
 
-var result = await service.SortAsync();
+var result = service.Sort();
 
 if (result.IsSuccess == true)
 {
