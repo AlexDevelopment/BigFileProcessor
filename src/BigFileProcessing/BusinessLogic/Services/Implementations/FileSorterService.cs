@@ -17,6 +17,7 @@ namespace BusinessLogic.Services.Implementations
         
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
         private readonly BLI.IFileSplitter _splitter;
+        private readonly BLI.IFileMerger _merger;
 
         #endregion
 
@@ -24,10 +25,12 @@ namespace BusinessLogic.Services.Implementations
 
         #region Constructors
         public FileSorterService(IOptions<INF.SorterOptions> sorterOptions, 
-                                    BLI.IFileSplitter splitter)
+                                    BLI.IFileSplitter splitter,
+                                    BLI.IFileMerger merger)
         {
             _sorterOptions = sorterOptions;
             _splitter = splitter;
+            _merger = merger;
         }
 
         #endregion
@@ -54,6 +57,8 @@ namespace BusinessLogic.Services.Implementations
                 }                
 
                 var files = await _splitter.SplitInputFileAsync();
+
+                await _merger.MergeFilesAsync(files);
 
                 stopwatch.Stop();
 

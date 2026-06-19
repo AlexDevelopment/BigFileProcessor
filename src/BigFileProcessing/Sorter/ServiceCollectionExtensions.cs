@@ -26,7 +26,8 @@ namespace Sorter
                 .ValidateDataAnnotations();
 
             services.AddSingleton<BSI.IFileSorterService, BSIM.FileSorterService>();
-            services.AddSingleton<BSI.IFileSplitter, BSIM.FileSplitter>();
+            services.AddSingleton<BSI.IFileSplitter, BSIM.FakeFileSplitter /*BSIM.FileSplitter*/>();
+            services.AddSingleton<BSI.IFileMerger, BSIM.FileMerger>();
             services.AddSingleton<BSI.IRowDataParser, BSIM.RowDataParser>();
 
             return services;
