@@ -47,7 +47,7 @@ namespace BusinessLogic.Services.Implementations
 
             try
             {
-                _logger.LogInformation("starting file sort operation.");
+                _logger.LogInformation("starting file sort operation...");
 
                 long before = process.WorkingSet64;
 
@@ -56,14 +56,25 @@ namespace BusinessLogic.Services.Implementations
                 string inputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}";
                 string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
 
+                _logger.LogInformation("input file: {InputFileName}", inputFileName);
+                _logger.LogInformation("output file: {OutputFileName}", outputFileName);    
+
                 if (File.Exists(outputFileName) == true)
                 {
                     File.Delete(outputFileName);
                 }                
 
+                _logger.LogInformation("starting file split operation...");
+
                 var files = await _splitter.SplitInputFileAsync();
 
+                _logger.LogInformation("file split operation completed successfully. {FileCount} files created.", files.Count);
+                
+                _logger.LogInformation("starting file merge operation...");
+
                 await _merger.MergeFilesAsync(files);
+
+                _logger.LogInformation("file merge operation completed successfully.");
 
                 stopwatch.Stop();
 
