@@ -56,7 +56,7 @@ namespace BusinessLogic.Services.Implementations
                 return null;
             }
 
-            return new BLO.RowData(Number: number, Text: parts[1]);
+            return new BLO.RowData(Number: number, Text: parts[1].Trim());
         }
 
         #endregion

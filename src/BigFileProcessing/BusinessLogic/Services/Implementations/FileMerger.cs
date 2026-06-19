@@ -76,7 +76,7 @@ namespace BusinessLogic.Services.Implementations
                 {
                     var item = queue.Dequeue();
 
-                    await writer.WriteLineAsync(item.Row.ToString());
+                    await writer.WriteLineAsync(item.Row.Output);
 
                     var nextLine = await _readers[item.ReaderIndex].ReadLineAsync();
 

@@ -36,7 +36,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public async Task<List<string>> SplitInputFileAsync()
+        public List<string> SplitInputFile()
         {
             var files = Directory.EnumerateFiles(_sorterOptions.Value.Folder, "chunk_*.txt");
 

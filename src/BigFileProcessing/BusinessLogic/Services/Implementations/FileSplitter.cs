@@ -36,7 +36,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public async Task<List<string>> SplitInputFileAsync()
+        public List<string> SplitInputFile()
         {
             int fileIndex = 0;
             long currentFileSize = 0;
@@ -54,15 +54,10 @@ namespace BusinessLogic.Services.Implementations
 
             using (var reader = new StreamReader($"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}"))
             {
-                while (reader.EndOfStream == false)
+                string? line;
+
+                while ((line = reader.ReadLine()) != null)
                 {
-                    var line = reader.ReadLine();
-
-                    if (line == null) 
-                    { 
-                        continue; 
-                    }
-
                     var row = _parser.Parse(line);
 
                     if (row == null)
@@ -72,7 +67,7 @@ namespace BusinessLogic.Services.Implementations
 
                     BLO.RowData realRow = (BLO.RowData)row;
 
-                    long rowSize = Encoding.UTF8.GetByteCount(realRow.ToString()) + 1;
+                    long rowSize = Encoding.UTF8.GetByteCount(realRow.Output) + 1;
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
                     {                        
@@ -80,10 +75,10 @@ namespace BusinessLogic.Services.Implementations
 
                         foreach (var item in fileContent)
                         {
-                            await writer.WriteLineAsync(item.ToString());
+                            writer.WriteLine(item.Output);
                         }                        
 
-                        await writer.DisposeAsync();
+                        writer.Dispose();
                         writer.Close();
 
                         fileContent.Clear();
@@ -107,11 +102,11 @@ namespace BusinessLogic.Services.Implementations
                 {
                     foreach (var item in fileContent)
                     {
-                        await writer.WriteLineAsync(item.ToString());
+                        writer.WriteLine(item.Output);
                     }
                 }
 
-                await writer.DisposeAsync();
+                writer.Dispose();
                 writer.Close();
             }
 

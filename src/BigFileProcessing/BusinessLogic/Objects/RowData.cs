@@ -8,6 +8,6 @@ namespace BusinessLogic.Objects
 {
     public record struct RowData(int Number, string Text)
     {
-        public override string ToString() => $"{Number}.{Text}";        
+        public string Output { get; } = $"{Number}. {Text}";
     }
 }

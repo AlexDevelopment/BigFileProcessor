@@ -66,7 +66,7 @@ namespace BusinessLogic.Services.Implementations
 
                 _logger.LogInformation("starting file split operation...");
 
-                var files = await _splitter.SplitInputFileAsync();
+                var files = _splitter.SplitInputFile();
 
                 _logger.LogInformation("file split operation completed successfully. {FileCount} files created.", files.Count);
                 
