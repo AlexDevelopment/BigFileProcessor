@@ -36,6 +36,7 @@ namespace Generator
 
             services.AddSingleton<BSI.IFileGeneratorService, BSIM.FileGeneratorService>();
             services.AddSingleton<BSI.IRowContentProvider, BSIM.RowContentProvider>();
+            services.AddSingleton<BSI.IRowDataParser, BSIM.RowDataParser>();
 
             return services;
         }

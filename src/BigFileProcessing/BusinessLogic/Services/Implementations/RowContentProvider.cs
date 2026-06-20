@@ -39,10 +39,22 @@ namespace BusinessLogic.Services.Implementations
             var strings = _generatorOptions.Value.Strings;
             var ints = _generatorOptions.Value.Numbers;
 
-            int i = _random.Next(0, ints.Length - 1);
-            int j = _random.Next(0, strings.Length - 1);
+            int i = _random.Next(0, ints.Length - 1);            
 
-            return _parser.Parse($"{ints[i]}. {strings[j]}");
+            int length = _random.Next(1, 10);
+
+            List<string> components = new List<string>();
+
+            for (int k = 0; k < length; k++)
+            {
+                int index = _random.Next(0, strings.Length - 1);
+
+                components.Add(strings[index]);
+            }
+
+            string text = string.Join(" ", components);
+
+            return _parser.Parse($"{ints[i]}. {text}");
         }
 
         #endregion
