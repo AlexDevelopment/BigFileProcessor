@@ -69,7 +69,7 @@ namespace BusinessLogic.Services.Implementations
 
                     BLO.RowData realRow = (BLO.RowData)row;
 
-                    long rowSize = Encoding.UTF8.GetByteCount(realRow.Output) + 1;
+                    long rowSize = realRow.Output.Length + 1;
 
                     if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
                     {                        

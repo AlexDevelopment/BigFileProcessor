@@ -69,13 +69,21 @@ namespace BusinessLogic.Services.Implementations
 
                 _logger.LogInformation("starting file split operation...");
 
+                var splitWatch = Stopwatch.StartNew();
+
                 var files = _splitter.SplitInputFile();
+
+                splitWatch.Stop();
 
                 _logger.LogInformation("file split operation completed successfully. {FileCount} files created.", files.Count);
                 
                 _logger.LogInformation("starting file merge operation...");
 
+                var mergeWatch = Stopwatch.StartNew();
+
                 _merger.MergeFiles(files);
+
+                mergeWatch.Stop();
 
                 _logger.LogInformation("file merge operation completed successfully.");
 
@@ -86,6 +94,8 @@ namespace BusinessLogic.Services.Implementations
                 var output = new BLO.FileSortResponse()
                 {
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
+                    FileSplitElapsedTime = splitWatch.ElapsedMilliseconds,
+                    FileMergeElapsedTime = mergeWatch.ElapsedMilliseconds,
                     UsedMemory = after - before,
                     TotalFiles = files.Count,
                     OutputFileName = outputFileName
