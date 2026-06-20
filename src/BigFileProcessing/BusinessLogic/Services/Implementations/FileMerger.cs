@@ -76,7 +76,7 @@ namespace BusinessLogic.Services.Implementations
                 {
                     var item = queue.Dequeue();
 
-                    writer.WriteLine(item.Row.Output);
+                    writer.WriteLine(item.Row.Original);
 
                     var nextLine = _readers[item.ReaderIndex].ReadLine();
 

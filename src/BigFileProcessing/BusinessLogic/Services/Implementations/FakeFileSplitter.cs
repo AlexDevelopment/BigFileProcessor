@@ -36,11 +36,11 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public List<string> SplitInputFile()
+        public Task<List<string>> SplitInputFileAsync()
         {
             var files = Directory.EnumerateFiles(_sorterOptions.Value.Folder, "chunk_*.txt");
 
-            return files.ToList();
+            return Task.FromResult(files.ToList());
         }
 
         #endregion

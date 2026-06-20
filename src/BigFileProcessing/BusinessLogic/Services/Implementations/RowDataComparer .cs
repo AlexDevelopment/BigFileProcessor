@@ -5,10 +5,15 @@ namespace BusinessLogic.Services.Implementations
 {
     struct RowDataComparer : IComparer<BLO.RowData>
     {
+        #region Public Methods
+
         public int Compare(BLO.RowData x, BLO.RowData y)
         {
-            int textCmp = string.Compare(x.Text, y.Text, StringComparison.Ordinal);
-            return textCmp != 0 ? textCmp : x.Number.CompareTo(y.Number);
+            int cmp = x.TextSpan.CompareTo(y.TextSpan, StringComparison.Ordinal);
+
+            return cmp != 0 ? cmp : x.Number.CompareTo(y.Number);
         }
+
+        #endregion
     }
 }

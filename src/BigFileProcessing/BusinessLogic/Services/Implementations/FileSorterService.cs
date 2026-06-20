@@ -46,13 +46,14 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
         public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
         {
-            var process = Process.GetCurrentProcess();
+            var gen0 = GC.CollectionCount(0);
+            var gen1 = GC.CollectionCount(1);
+            var gen2 = GC.CollectionCount(2);
+            var alloc = GC.GetTotalAllocatedBytes();
 
             try
             {
                 _logger.LogInformation("starting file sort operation...");
-
-                long before = process.WorkingSet64;
 
                 var stopwatch = Stopwatch.StartNew();
 
@@ -71,7 +72,7 @@ namespace BusinessLogic.Services.Implementations
 
                 var splitWatch = Stopwatch.StartNew();
 
-                var files = _splitter.SplitInputFile();
+                var files = await _splitter.SplitInputFileAsync();
 
                 splitWatch.Stop();
 
@@ -89,16 +90,26 @@ namespace BusinessLogic.Services.Implementations
 
                 stopwatch.Stop();
 
-                long after = process.WorkingSet64;
+                var gen0Before = GC.CollectionCount(0);
+                var gen1Before = GC.CollectionCount(1);
+                var gen2Before = GC.CollectionCount(2);
+                var allocBefore = GC.GetTotalAllocatedBytes();
+
 
                 var output = new BLO.FileSortResponse()
                 {
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
                     FileSplitElapsedTime = splitWatch.ElapsedMilliseconds,
                     FileMergeElapsedTime = mergeWatch.ElapsedMilliseconds,
-                    UsedMemory = after - before,
+                    UsedMemory = 0,
                     TotalFiles = files.Count,
-                    OutputFileName = outputFileName
+                    OutputFileName = outputFileName,
+                    ConsumerCount = _sorterOptions.Value.ConsumerCount,
+                    ChannelCapacity = _sorterOptions.Value.ChannelCapacity,
+                    Gen0Delta = GC.CollectionCount(0) - gen0,
+                    Gen1Delta = GC.CollectionCount(1) - gen1,
+                    Gen2Delta = GC.CollectionCount(2) - gen2,
+                    AllocDelta = GC.GetTotalAllocatedBytes() - alloc
                 };
                 
                 //the file deletion is outside of time measurement, as it is not part of the sorting operation

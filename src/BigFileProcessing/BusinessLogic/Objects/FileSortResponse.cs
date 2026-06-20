@@ -11,6 +11,12 @@ namespace BusinessLogic.Objects
         public required string OutputFileName { get; init; }
         public required long FileSplitElapsedTime { get; init; }
         public required long FileMergeElapsedTime { get; init; }
+        public required int ConsumerCount { get; init; }
+        public required int ChannelCapacity { get; init; }
+        public required int Gen0Delta { get; init; }
+        public required int Gen1Delta { get; init; }
+        public required int Gen2Delta { get; init; }
+        public required long AllocDelta { get; init; }
 
         #endregion
 
@@ -24,7 +30,7 @@ namespace BusinessLogic.Objects
             var splitMinutes = TimeSpan.FromMilliseconds(FileSplitElapsedTime).TotalMinutes;
             var mergeMinutes = TimeSpan.FromMilliseconds(FileMergeElapsedTime).TotalMinutes;
 
-            return $"\noutput file name: {OutputFileName}\ntotal elapsed time: {ElapsedTime:N0} ms / {minutes:N2} min\nfile split time: {FileSplitElapsedTime:N0} ms / {splitMinutes:N2} min\nfile merge time: {FileMergeElapsedTime:N0} ms / {mergeMinutes:N2} min\nused memory: {UsedMemory:N0} bytes\ntotal files: {TotalFiles:N0}";
+            return $"\noutput file name: {OutputFileName}\ntotal elapsed time: {ElapsedTime:N0} ms / {minutes:N2} min\nfile split time: {FileSplitElapsedTime:N0} ms / {splitMinutes:N2} min\nfile merge time: {FileMergeElapsedTime:N0} ms / {mergeMinutes:N2} min\nused memory: {UsedMemory:N0} bytes\ntotal files: {TotalFiles:N0}\nconsumer count: {ConsumerCount:N0}\nchannel capacity: {ChannelCapacity:N0}\nGen0 delta: {Gen0Delta:N0}\nGen1 delta: {Gen1Delta:N0}\nGen2 delta: {Gen2Delta:N0}\nAlloc delta: {AllocDelta:N0}";
         }
 
         #endregion

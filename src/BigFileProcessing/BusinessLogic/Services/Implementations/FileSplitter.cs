@@ -1,9 +1,9 @@
-﻿using System.Text;
-
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using BusinessLogic.Extensions;
-
+using NLog.Filters;
+using System.Collections.Concurrent;
+using System.Text;
+using System.Threading.Channels;
 using BLC = BusinessLogic.Constants;
 using BLI = BusinessLogic.Services.Interfaces;
 using BLO = BusinessLogic.Objects;
@@ -18,16 +18,21 @@ namespace BusinessLogic.Services.Implementations
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
         private readonly BLI.IRowDataParser _parser;
 
+        private readonly ILogger<FileSplitter> _logger;
+
         #endregion
 
 
 
         #region Constructors
 
-        public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, BLI.IRowDataParser parser)
+        public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, 
+                                BLI.IRowDataParser parser,
+                                ILogger<FileSplitter> logger)
         {
             _sorterOptions = sorterOptions;
             _parser = parser;
+            _logger = logger;
         }
 
         #endregion
@@ -35,65 +40,131 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public List<string> SplitInputFile()
+
+        public async Task<List<string>> SplitInputFileAsync()
         {
+            int consumerCount = Math.Max(1, _sorterOptions.Value.ConsumerCount);
+            int capacity = Math.Max(1, _sorterOptions.Value.ChannelCapacity);
+
+            var channel = Channel.CreateBounded<BLO.ChannelChunkData>(
+                new BoundedChannelOptions(capacity)
+                {
+                    FullMode = BoundedChannelFullMode.Wait,
+                    SingleWriter = true,
+                    SingleReader = consumerCount == 1
+                });
+
+            var chunkFiles = new ConcurrentBag<string>();
+
+            var consumers = new Task[consumerCount];
+
+            for (int i = 0; i < consumerCount; i++)
+            {
+                consumers[i] = Task.Run(() => ConsumeAsync(channel.Reader, chunkFiles, _logger));
+            }
+
+            try
+            {
+                await ProduceAsync(channel.Writer);
+
+                channel.Writer.Complete();
+            }
+            catch (Exception ex)
+            {
+                channel.Writer.Complete(ex);
+            }
+
+            await Task.WhenAll(consumers);
+
+            return chunkFiles.ToList();
+        }
+
+        #endregion
+
+
+
+        #region Private Methods
+
+        private async Task ProduceAsync(ChannelWriter<BLO.ChannelChunkData> channelWriter)
+        {
+            string folder = _sorterOptions.Value.Folder;
+            long maxChunkSize = _sorterOptions.Value.MaxChunkSize;
+
             int fileIndex = 0;
             long currentFileSize = 0;
 
-            var fileContent = new List<BLO.RowData>();
+            var rows = new List<string>();
 
-            string chunkFileName = $"{_sorterOptions.Value.Folder}\\chunk_{fileIndex}.txt";
+            using var reader = new StreamReader($"{folder}\\{BLC.Files.InputFile}",
+                                                Encoding.UTF8, false,
+                                                BLC.StreamBuffers.ReadBufferSize);
 
-            var output = new List<string>() 
+            string? line;
+
+            while ((line = reader.ReadLine()) != null)
             {
-                chunkFileName
-            };
+                long rowSize = line.Length + 1;
 
-            StreamWriter writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, 
-                                                    BLC.StreamBuffers.WriteBufferSize);
-
-            using (var reader = new StreamReader($"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}", 
-                                                                  Encoding.UTF8, false, 
-                                                                  BLC.StreamBuffers.ReadBufferSize))
-            {
-                string? line;
-
-                while ((line = reader.ReadLine()) != null)
+                if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
                 {
-                    var row = _parser.Parse(line);
+                    await channelWriter.WriteAsync(
+                        new BLO.ChannelChunkData($"{folder}\\chunk_{fileIndex}.txt", rows));
+                    
+                    _logger.LogInformation("chunk data sent to channel: {ChunkFileName} => {RowCount} rows", $"{folder}\\chunk_{fileIndex}.txt", rows.Count);
 
-                    if (row == null)
-                    {
-                        continue;
-                    }
-
-                    BLO.RowData realRow = (BLO.RowData)row;
-
-                    long rowSize = realRow.Output.Length + 1;
-
-                    if (currentFileSize + rowSize > _sorterOptions.Value.MaxChunkSize)
-                    {                        
-                        writer.SortWriteDispose(fileContent);
-
-                        fileContent.Clear();
-                        fileIndex++;
-                        currentFileSize = 0;
-
-                        chunkFileName = $"{_sorterOptions.Value.Folder}\\chunk_{fileIndex}.txt";
-
-                        output.Add(chunkFileName);
-
-                        writer = new StreamWriter(chunkFileName, false, Encoding.UTF8, BLC.StreamBuffers.WriteBufferSize);
-                    }
-
-                    fileContent.Add(realRow);
-                    currentFileSize += rowSize;
+                    rows = new List<string>();
+                    fileIndex++;
+                    currentFileSize = 0;
                 }
-                
-                writer.SortWriteDispose(fileContent);
+
+                rows.Add(line);
+                currentFileSize += rowSize;
             }
 
-            return output;
+            if (rows.Count > 0)
+            {
+                await channelWriter.WriteAsync(
+                    new BLO.ChannelChunkData($"{folder}\\chunk_{fileIndex}.txt", rows));
+
+                _logger.LogInformation("chunk data sent to channel: {ChunkFileName} => {RowCount} rows", $"{folder}\\chunk_{fileIndex}.txt", rows.Count);
+            }
+        }
+
+        private static async Task ConsumeAsync(ChannelReader<BLO.ChannelChunkData> channelReader,
+                                               ConcurrentBag<string> chunkFiles,
+                                               ILogger<FileSplitter> logger)
+        {           
+            var parser = new RowDataParser();
+            var comparer = new RowDataComparer();
+
+            await foreach (var chunk in channelReader.ReadAllAsync())
+            {
+                var rows = new List<BLO.RowData>();
+
+                chunk.Rows.ForEach(line =>
+                {
+                    var row = parser.Parse(line);
+                    if (row != null)
+                    {
+                        rows.Add((BLO.RowData)row);
+                    }
+                });
+
+                rows.Sort(comparer);
+
+                using (var writer = new StreamWriter(chunk.FullFileName, false, Encoding.UTF8,
+                                                     BLC.StreamBuffers.WriteBufferSize))
+                {
+                    foreach (var row in rows)
+                    {
+                        writer.WriteLine(row.Original);
+                    }
+                }
+
+                chunkFiles.Add(chunk.FullFileName);
+
+                logger.LogInformation("chunk data processed by channel: {ChunkFileName} => {RowCount} rows", chunk.FullFileName, rows.Count);
+            }
         }
 
         #endregion
