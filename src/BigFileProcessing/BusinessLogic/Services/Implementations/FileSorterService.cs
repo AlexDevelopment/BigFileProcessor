@@ -44,26 +44,12 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync()
+        public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync(CancellationToken token)
         {
-            long peak = 0;
-
-            using var cts = new CancellationTokenSource();
-
-            var memoryCheck = Task.Run(async () =>
+            if (token.IsCancellationRequested == true)
             {
-                while (cts.Token.IsCancellationRequested == false)
-                {
-                    long managed = GC.GetTotalMemory(false);
-
-                    if (managed > peak)
-                    {
-                        peak = managed;
-                    }
-
-                    try { await Task.Delay(25, cts.Token); } catch { }
-                }                
-            });
+                return BLO.Result<BLO.FileSortResponse>.Failure(new OperationCanceledException("file sort operation was cancelled before it started."));
+            }
 
             try
             {
@@ -75,7 +61,12 @@ namespace BusinessLogic.Services.Implementations
                 string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
 
                 _logger.LogInformation("input file: {InputFileName}", inputFileName);
-                _logger.LogInformation("output file: {OutputFileName}", outputFileName);    
+                _logger.LogInformation("output file: {OutputFileName}", outputFileName);
+
+                if (token.IsCancellationRequested == true)
+                {
+                    return BLO.Result<BLO.FileSortResponse>.Failure(new OperationCanceledException("file sort operation was cancelled"));
+                }
 
                 if (File.Exists(outputFileName) == true)
                 {
@@ -85,6 +76,11 @@ namespace BusinessLogic.Services.Implementations
                 _logger.LogInformation("starting file split operation...");
 
                 var splitWatch = Stopwatch.StartNew();
+
+                if (token.IsCancellationRequested == true)
+                {
+                    return BLO.Result<BLO.FileSortResponse>.Failure(new OperationCanceledException("file sort operation was cancelled before it started."));
+                }
 
                 var files = await _splitter.SplitInputFileAsync();
 
@@ -96,6 +92,11 @@ namespace BusinessLogic.Services.Implementations
 
                 var mergeWatch = Stopwatch.StartNew();
 
+                if (token.IsCancellationRequested == true)
+                {
+                    return BLO.Result<BLO.FileSortResponse>.Failure(new OperationCanceledException("file sort operation was cancelled before it started."));
+                }
+
                 _merger.MergeFiles(files);
 
                 mergeWatch.Stop();
@@ -104,16 +105,11 @@ namespace BusinessLogic.Services.Implementations
 
                 stopwatch.Stop();
 
-                cts.Cancel();
-
-                await memoryCheck;
-
                 var output = new BLO.FileSortResponse()
                 {
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
                     FileSplitElapsedTime = splitWatch.ElapsedMilliseconds,
                     FileMergeElapsedTime = mergeWatch.ElapsedMilliseconds,
-                    UsedMemory = peak,
                     TotalFiles = files.Count,
                     OutputFileName = outputFileName,
                     ConsumerCount = _sorterOptions.Value.ConsumerCount,
@@ -134,11 +130,6 @@ namespace BusinessLogic.Services.Implementations
             }
             catch (Exception ex)
             {
-                if ( cts.IsCancellationRequested == false)
-                {
-                    cts.Cancel();
-                }
-
                 _logger.LogError(ex, "an error occurred during the file sort operation.");
 
                 return BLO.Result<BLO.FileSortResponse>.Failure(ex);

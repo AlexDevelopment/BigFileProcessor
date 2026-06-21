@@ -21,7 +21,7 @@ Console.WriteLine($"max file size: {options.Value.MaxFileSize:N0} in bytes");
 Console.WriteLine($"max text component count: {options.Value.MaxTextComponentCount}\n\n");
 Console.WriteLine("start file generation...\n");
 
-var result = await service.GenerateAsync();
+var result = await service.GenerateAsync(CancellationToken.None);
 
 if (result.IsSuccess == true)
 {
@@ -32,5 +32,3 @@ else
     Console.WriteLine("file generation has failed");
     Console.WriteLine($"error: {result.Error}");
 }
-
-Console.ReadLine();

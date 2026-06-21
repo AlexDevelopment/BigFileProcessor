@@ -26,7 +26,7 @@ Console.WriteLine($"channel capacity: {options.Value.ChannelCapacity}");
 Console.WriteLine($"consumer count: {options.Value.ConsumerCount}\n");
 Console.WriteLine("start file sorting...\n");
 
-var result = await service.SortAsync();
+var result = await service.SortAsync(CancellationToken.None);
 
 if (result.IsSuccess == true)
 {
@@ -37,5 +37,3 @@ else
     Console.WriteLine("file sorting has failed");
     Console.WriteLine($"error: {result.Error?.Message}");
 }
-
-Console.ReadLine();

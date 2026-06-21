@@ -55,7 +55,7 @@ namespace Services.Tests
         }
 
         public static IOptions<INF.SorterOptions> Sorter(string folder,
-                                                         int maxChunkSize = 1024,
+                                                         long maxChunkSize = 1024,
                                                          int channelCapacity = 4,
                                                          int consumerCount = 2)
         {

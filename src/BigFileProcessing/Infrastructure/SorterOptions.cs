@@ -11,7 +11,7 @@
 
 
         #region Public properties
-        public required int MaxChunkSize { get; set; }
+        public required long MaxChunkSize { get; set; }
         public required int ChannelCapacity { get; set; }
         public int ConsumerCount { get; set; }
 

@@ -40,7 +40,7 @@ namespace Services.Tests
             deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>())).Returns(Task.CompletedTask);
 
             var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object,
-                                      consumerCount: 3, channelCapacity: 7).SortAsync();
+                                      consumerCount: 3, channelCapacity: 7).SortAsync(CancellationToken.None);
 
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Response);
@@ -69,7 +69,7 @@ namespace Services.Tests
             var deleter = new Mock<BLI.IFileDeleter>();
             deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>())).Returns(Task.CompletedTask);
 
-            var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object).SortAsync();
+            var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object).SortAsync(CancellationToken.None);
 
             Assert.True(result.IsSuccess);
             // merger is a no-op mock, so the stale file should have been removed and not recreated
@@ -87,7 +87,7 @@ namespace Services.Tests
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();
 
-            var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object).SortAsync();
+            var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object).SortAsync(CancellationToken.None);
 
             Assert.False(result.IsSuccess);
             Assert.IsType<IOException>(result.Error);

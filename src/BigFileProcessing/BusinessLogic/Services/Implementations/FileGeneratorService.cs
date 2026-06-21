@@ -39,7 +39,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync()
+        public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync(CancellationToken token)
         {                       
             var process = Process.GetCurrentProcess();
 

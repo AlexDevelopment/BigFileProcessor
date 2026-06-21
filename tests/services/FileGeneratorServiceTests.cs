@@ -30,7 +30,7 @@ namespace Services.Tests
             provider.Setup(p => p.Generate()).Returns(SampleRow);
 
             // 8 bytes per row, cap of 40 -> exactly 5 rows fit (5*8 = 40)
-            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync();
+            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync(CancellationToken.None);
 
             Assert.True(result.IsSuccess);
             Assert.NotNull(result.Response);
@@ -54,7 +54,7 @@ namespace Services.Tests
             provider.Setup(p => p.Generate())
                     .Returns(() => call++ == 0 ? (BLO.RowData?)null : SampleRow);
 
-            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync();
+            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync(CancellationToken.None);
 
             Assert.True(result.IsSuccess);
             Assert.Equal(5, result.Response!.TotalRecords);   // null row did not count
@@ -71,7 +71,7 @@ namespace Services.Tests
             var provider = new Mock<BLI.IRowContentProvider>();
             provider.Setup(p => p.Generate()).Returns(SampleRow);
 
-            var result = await Create(folder.Path, maxFileSize: 16, provider.Object).GenerateAsync();
+            var result = await Create(folder.Path, maxFileSize: 16, provider.Object).GenerateAsync(CancellationToken.None);
 
             Assert.True(result.IsSuccess);
             Assert.All(File.ReadAllLines(inputFile), line => Assert.Equal("5. text", line));
@@ -85,7 +85,7 @@ namespace Services.Tests
             var provider = new Mock<BLI.IRowContentProvider>();
             provider.Setup(p => p.Generate()).Throws(new InvalidOperationException("boom"));
 
-            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync();
+            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync(CancellationToken.None);
 
             Assert.False(result.IsSuccess);
             Assert.NotNull(result.Error);

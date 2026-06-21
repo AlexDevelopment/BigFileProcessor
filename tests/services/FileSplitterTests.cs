@@ -8,11 +8,10 @@ namespace Services.Tests
 {
     public class FileSplitterTests
     {
-        private static BLI.IFileSplitter Create(string folder, int maxChunkSize)
+        private static BLI.IFileSplitter Create(string folder, long maxChunkSize)
         {
             return new Impl.FileSplitter(
                 OptionsFactory.Sorter(folder, maxChunkSize: maxChunkSize, channelCapacity: 4, consumerCount: 2),
-                new Impl.RowDataParser(),
                 new Impl.ChunkFileNameComposer(),
                 NullLogger<Impl.FileSplitter>.Instance);
         }
@@ -75,7 +74,6 @@ namespace Services.Tests
 
             var splitter = new Impl.FileSplitter(
                 OptionsFactory.Sorter(folder.Path, maxChunkSize: 1024, channelCapacity: 1, consumerCount: 1),
-                new Impl.RowDataParser(),
                 new Impl.ChunkFileNameComposer(),
                 NullLogger<Impl.FileSplitter>.Instance);
 

@@ -16,7 +16,6 @@ namespace BusinessLogic.Services.Implementations
         #region Private Members
 
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
-        private readonly BLI.IRowDataParser _parser;
         private readonly BLI.IChunkFileNameComposer _chunkFileNameComposer;
 
         private readonly ILogger<FileSplitter> _logger;
@@ -28,12 +27,10 @@ namespace BusinessLogic.Services.Implementations
         #region Constructors
 
         public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, 
-                                BLI.IRowDataParser parser,
                                 BLI.IChunkFileNameComposer chunkFileNameComposer,
                                 ILogger<FileSplitter> logger)
         {
             _sorterOptions = sorterOptions;
-            _parser = parser;
             _chunkFileNameComposer = chunkFileNameComposer;
             _logger = logger;
         }
