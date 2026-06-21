@@ -40,21 +40,21 @@ namespace BusinessLogic.Services.Implementations
             var ints = _generatorOptions.Value.Numbers;
             var maxTextComponentCount = _generatorOptions.Value.MaxTextComponentCount;
 
-            int i = _random.Next(0, ints.Length - 1);            
+            int intsIndex = _random.Next(0, ints.Length);            
 
             int length = _random.Next(1, maxTextComponentCount);
             List<string> components = new List<string>();
 
             for (int k = 0; k < length; k++)
             {
-                int index = _random.Next(0, strings.Length - 1);
+                int index = _random.Next(0, strings.Length);
 
                 components.Add(strings[index]);
             }
 
             string text = string.Join(" ", components);
 
-            return _parser.Parse($"{ints[i]}. {text}");
+            return _parser.Parse($"{ints[intsIndex]}. {text}");
         }
 
         #endregion

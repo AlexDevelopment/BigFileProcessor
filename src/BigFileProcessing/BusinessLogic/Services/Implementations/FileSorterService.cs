@@ -134,6 +134,11 @@ namespace BusinessLogic.Services.Implementations
             }
             catch (Exception ex)
             {
+                if ( cts.IsCancellationRequested == false)
+                {
+                    cts.Cancel();
+                }
+
                 _logger.LogError(ex, "an error occurred during the file sort operation.");
 
                 return BLO.Result<BLO.FileSortResponse>.Failure(ex);
