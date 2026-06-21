@@ -119,7 +119,7 @@ namespace BusinessLogic.Services.Implementations
                     await channelWriter.WriteAsync(
                         new BLO.ChannelChunkData(chunkFileName, rows));
                     
-                    _logger.LogInformation("chunk data sent to channel: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
+                    _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
 
                     rows = new List<string>();
                     fileIndex++;
@@ -137,7 +137,7 @@ namespace BusinessLogic.Services.Implementations
                 await channelWriter.WriteAsync(
                     new BLO.ChannelChunkData(chunkFileName, rows));
 
-                _logger.LogInformation("chunk data sent to channel: {ChunkFileName} / {RowCount} rows", chunkFileName, rows.Count);
+                _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount} rows", chunkFileName, rows.Count);
             }
         }
 
@@ -174,7 +174,7 @@ namespace BusinessLogic.Services.Implementations
 
                 chunkFiles.Add(chunk.FullFileName);
 
-                logger.LogInformation("chunk data processed by channel: {ChunkFileName} => {RowCount} rows", chunk.FullFileName, rows.Count);
+                logger.LogInformation("consumer processed chunk: {ChunkFileName} => {RowCount:N0} rows", chunk.FullFileName, rows.Count);
             }
         }
 
