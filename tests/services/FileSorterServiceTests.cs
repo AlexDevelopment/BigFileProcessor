@@ -33,7 +33,7 @@ namespace Services.Tests
             var chunks = new List<string> { folder.File("chunk_0.txt"), folder.File("chunk_1.txt") };
 
             var splitter = new Mock<BLI.IFileSplitter>();
-            splitter.Setup(s => s.SplitInputFileAsync()).ReturnsAsync(chunks);
+            splitter.Setup(s => s.SplitInputFileAsync(CancellationToken.None)).ReturnsAsync(chunks);
 
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();
@@ -49,7 +49,7 @@ namespace Services.Tests
             Assert.Equal(3, result.Response.ConsumerCount);
             Assert.Equal(7, result.Response.ChannelCapacity);
 
-            splitter.Verify(s => s.SplitInputFileAsync(), Times.Once);
+            splitter.Verify(s => s.SplitInputFileAsync(CancellationToken.None), Times.Once);
             merger.Verify(m => m.MergeFiles(chunks), Times.Once);
             deleter.Verify(d => d.DeleteFilesAsync(chunks), Times.Once);
         }
@@ -63,7 +63,7 @@ namespace Services.Tests
             File.WriteAllText(staleOutput, "old output");
 
             var splitter = new Mock<BLI.IFileSplitter>();
-            splitter.Setup(s => s.SplitInputFileAsync()).ReturnsAsync(new List<string>());
+            splitter.Setup(s => s.SplitInputFileAsync(CancellationToken.None)).ReturnsAsync(new List<string>());
 
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();
@@ -82,7 +82,7 @@ namespace Services.Tests
             using var folder = new TempFolder();
 
             var splitter = new Mock<BLI.IFileSplitter>();
-            splitter.Setup(s => s.SplitInputFileAsync()).ThrowsAsync(new IOException("disk gone"));
+            splitter.Setup(s => s.SplitInputFileAsync(CancellationToken.None)).ThrowsAsync(new IOException("disk gone"));
 
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();

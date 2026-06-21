@@ -41,7 +41,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public async Task<List<string>> SplitInputFileAsync()
+        public async Task<List<string>> SplitInputFileAsync(CancellationToken token)
         {
             int consumerCount = Math.Max(1, _sorterOptions.Value.ConsumerCount);
             int capacity = Math.Max(1, _sorterOptions.Value.ChannelCapacity);
@@ -60,14 +60,14 @@ namespace BusinessLogic.Services.Implementations
 
             for (int i = 0; i < consumerCount; i++)
             {
-                consumers[i] = Task.Run(() => ConsumeAsync(channel.Reader, chunkFiles, _logger));
+                consumers[i] = Task.Run(() => ConsumeAsync(channel.Reader, chunkFiles, _logger, token));
             }
 
             _logger.LogInformation("starting file split operation with {ConsumerCount:N0} consumers and channel capacity of {ChannelCapacity:N0}...", consumers.Length, capacity);
 
             try
             {
-                await ProduceAsync(channel.Writer);
+                await ProduceAsync(channel.Writer, token);
 
                 channel.Writer.Complete();
             }
@@ -87,7 +87,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Private Methods
 
-        private async Task ProduceAsync(ChannelWriter<BLO.ChannelChunkData> channelWriter)
+        private async Task ProduceAsync(ChannelWriter<BLO.ChannelChunkData> channelWriter, CancellationToken token)
         {
             string folder = _sorterOptions.Value.Folder;
             long maxChunkSize = _sorterOptions.Value.MaxChunkSize;
@@ -107,6 +107,11 @@ namespace BusinessLogic.Services.Implementations
 
             while ((line = reader.ReadLine()) != null)
             {
+                if (token.IsCancellationRequested == true)
+                {
+                    break;
+                }
+
                 long rowSize = line.Length + 1;
 
                 if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
@@ -140,12 +145,13 @@ namespace BusinessLogic.Services.Implementations
 
         private static async Task ConsumeAsync(ChannelReader<BLO.ChannelChunkData> channelReader,
                                                ConcurrentBag<string> chunkFiles,
-                                               ILogger<FileSplitter> logger)
+                                               ILogger<FileSplitter> logger,
+                                               CancellationToken token)
         {           
             var parser = new RowDataParser();
             var comparer = new RowDataComparer();
 
-            await foreach (var chunk in channelReader.ReadAllAsync())
+            await foreach (var chunk in channelReader.ReadAllAsync(token))
             {
                 var rows = new List<BLO.RowData>();
 

@@ -46,7 +46,7 @@ namespace Services.Tests
             File.WriteAllLines(folder.File("unsorted.txt"), input);
 
             // small chunk size forces the input to be split across several files
-            var files = await Create(folder.Path, maxChunkSize: 20).SplitInputFileAsync();
+            var files = await Create(folder.Path, maxChunkSize: 20).SplitInputFileAsync(CancellationToken.None);
 
             Assert.NotEmpty(files);
             Assert.True(files.Count > 1, "expected the input to be split into multiple chunks");
@@ -77,7 +77,7 @@ namespace Services.Tests
                 new Impl.ChunkFileNameComposer(),
                 NullLogger<Impl.FileSplitter>.Instance);
 
-            var files = await splitter.SplitInputFileAsync();
+            var files = await splitter.SplitInputFileAsync(CancellationToken.None);
 
             Assert.Single(files);
             Assert.Equal(new[] { "1. a", "2. b" }, File.ReadAllLines(files[0]));

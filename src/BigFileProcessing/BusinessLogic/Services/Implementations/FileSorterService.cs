@@ -82,7 +82,7 @@ namespace BusinessLogic.Services.Implementations
                     return BLO.Result<BLO.FileSortResponse>.Failure(new OperationCanceledException("file sort operation was cancelled before it started."));
                 }
 
-                var files = await _splitter.SplitInputFileAsync();
+                var files = await _splitter.SplitInputFileAsync(token);
 
                 splitWatch.Stop();
 
