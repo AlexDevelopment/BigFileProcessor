@@ -14,6 +14,7 @@
         public required long MaxFileSize { get; set; }
         public required int[] Numbers { get; set; }
         public required string[] Strings { get; set; }
+        public required int MaxTextComponentCount { get; set; }
 
         #endregion
     }

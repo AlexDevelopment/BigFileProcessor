@@ -38,11 +38,11 @@ namespace BusinessLogic.Services.Implementations
         {
             var strings = _generatorOptions.Value.Strings;
             var ints = _generatorOptions.Value.Numbers;
+            var maxTextComponentCount = _generatorOptions.Value.MaxTextComponentCount;
 
             int i = _random.Next(0, ints.Length - 1);            
 
-            int length = _random.Next(1, 10);
-
+            int length = _random.Next(1, maxTextComponentCount);
             List<string> components = new List<string>();
 
             for (int k = 0; k < length; k++)
