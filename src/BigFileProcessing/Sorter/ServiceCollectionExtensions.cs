@@ -23,9 +23,13 @@ namespace Sorter
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddOptions<INF.SorterOptions>()
-                .Bind(configuration.GetSection(INF.SorterOptions.SectionName))
-                .ValidateDataAnnotations();
+            services
+                .Configure<INF.SorterOptions>(
+                    configuration.GetSection(INF.SorterOptions.SectionName))
+                .ConfigureOptions<INF.ConfigureSorterOptionsDefaults>()
+                .AddOptions<INF.SorterOptions>()
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
             services.AddLogging(loggingBuilder =>
             {

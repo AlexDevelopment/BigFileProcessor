@@ -4,6 +4,8 @@ namespace Infrastructure
 {
     public class ConfigureGeneratorOptionsDefaults : IConfigureOptions<GeneratorOptions>
     {
+        #region Public Methods
+
         public void Configure(GeneratorOptions options)
         {
 
@@ -27,5 +29,7 @@ namespace Infrastructure
                 options.MaxFileSize = 1048576; // 1 MB as default
             }
         }
+
+        #endregion
     }
 }

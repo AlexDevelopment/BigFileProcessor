@@ -21,7 +21,9 @@ var service = serviceProvider.GetRequiredService<BSI.IFileSorterService>();
 var options = serviceProvider.GetRequiredService<IOptions<INF.SorterOptions>>();
 
 Console.WriteLine($"input folder: {options.Value.Folder}");
-Console.WriteLine($"input file: {BLC.Files.InputFile}\n");
+Console.WriteLine($"input file: {BLC.Files.InputFile}");
+Console.WriteLine($"channel capacity: {options.Value.ChannelCapacity}");
+Console.WriteLine($"consumer count: {options.Value.ConsumerCount}\n");
 Console.WriteLine("start file sorting...\n");
 
 var result = await service.SortAsync();
