@@ -17,6 +17,7 @@ namespace BusinessLogic.Services.Implementations
 
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
         private readonly BLI.IRowDataParser _parser;
+        private readonly BLI.IChunkFileNameComposer _chunkFileNameComposer;
 
         private readonly ILogger<FileSplitter> _logger;
 
@@ -28,10 +29,12 @@ namespace BusinessLogic.Services.Implementations
 
         public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, 
                                 BLI.IRowDataParser parser,
+                                BLI.IChunkFileNameComposer chunkFileNameComposer,
                                 ILogger<FileSplitter> logger)
         {
             _sorterOptions = sorterOptions;
             _parser = parser;
+            _chunkFileNameComposer = chunkFileNameComposer;
             _logger = logger;
         }
 
@@ -63,6 +66,8 @@ namespace BusinessLogic.Services.Implementations
                 consumers[i] = Task.Run(() => ConsumeAsync(channel.Reader, chunkFiles, _logger));
             }
 
+            _logger.LogInformation("starting file split operation with {ConsumerCount:N0} consumers and channel capacity of {ChannelCapacity:N0}...", consumers.Length, capacity);
+
             try
             {
                 await ProduceAsync(channel.Writer);
@@ -93,6 +98,8 @@ namespace BusinessLogic.Services.Implementations
             int fileIndex = 0;
             long currentFileSize = 0;
 
+            string chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
+
             var rows = new List<string>();
 
             using var reader = new StreamReader($"{folder}\\{BLC.Files.InputFile}",
@@ -107,10 +114,12 @@ namespace BusinessLogic.Services.Implementations
 
                 if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
                 {
+                    chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
+
                     await channelWriter.WriteAsync(
-                        new BLO.ChannelChunkData($"{folder}\\chunk_{fileIndex}.txt", rows));
+                        new BLO.ChannelChunkData(chunkFileName, rows));
                     
-                    _logger.LogInformation("chunk data sent to channel: {ChunkFileName} => {RowCount} rows", $"{folder}\\chunk_{fileIndex}.txt", rows.Count);
+                    _logger.LogInformation("chunk data sent to channel: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
 
                     rows = new List<string>();
                     fileIndex++;
@@ -123,10 +132,12 @@ namespace BusinessLogic.Services.Implementations
 
             if (rows.Count > 0)
             {
-                await channelWriter.WriteAsync(
-                    new BLO.ChannelChunkData($"{folder}\\chunk_{fileIndex}.txt", rows));
+                chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
 
-                _logger.LogInformation("chunk data sent to channel: {ChunkFileName} => {RowCount} rows", $"{folder}\\chunk_{fileIndex}.txt", rows.Count);
+                await channelWriter.WriteAsync(
+                    new BLO.ChannelChunkData(chunkFileName, rows));
+
+                _logger.LogInformation("chunk data sent to channel: {ChunkFileName} / {RowCount} rows", chunkFileName, rows.Count);
             }
         }
 

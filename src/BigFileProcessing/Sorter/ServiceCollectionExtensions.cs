@@ -39,6 +39,7 @@ namespace Sorter
             services.AddSingleton<BSI.IFileMerger, BSIM.FileMerger>();
             services.AddSingleton<BSI.IFileDeleter, BSIM.FileDeleter>();
             services.AddSingleton<BSI.IRowDataParser, BSIM.RowDataParser>();
+            services.AddSingleton<BSI.IChunkFileNameComposer, BSIM.ChunkFileNameComposer>();
 
             return services;
         }

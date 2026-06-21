@@ -50,7 +50,7 @@ namespace BusinessLogic.Services.Implementations
 
             using var cts = new CancellationTokenSource();
 
-            var checker = Task.Run(async () =>
+            var memoryCheck = Task.Run(async () =>
             {
                 while (cts.Token.IsCancellationRequested == false)
                 {
@@ -106,7 +106,7 @@ namespace BusinessLogic.Services.Implementations
 
                 cts.Cancel();
 
-                await checker;
+                await memoryCheck;
 
                 var output = new BLO.FileSortResponse()
                 {
