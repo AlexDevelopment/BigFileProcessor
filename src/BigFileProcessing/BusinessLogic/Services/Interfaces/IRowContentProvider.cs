@@ -4,6 +4,6 @@ namespace BusinessLogic.Services.Interfaces
 {
     public interface IRowContentProvider
     {
-        BLO.RowData? Generate();
+        ReadOnlyMemory<char> Generate();
     }
 }

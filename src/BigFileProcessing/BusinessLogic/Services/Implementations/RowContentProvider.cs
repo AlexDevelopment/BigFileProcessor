@@ -14,7 +14,6 @@ namespace BusinessLogic.Services.Implementations
 
         private readonly Random _random = new Random();
         private readonly IOptions<INF.GeneratorOptions> _generatorOptions;
-        private readonly BSI.IRowDataParser _parser;
         
         #endregion
 
@@ -22,11 +21,9 @@ namespace BusinessLogic.Services.Implementations
 
         #region Constructor
 
-        public RowContentProvider(IOptions<INF.GeneratorOptions> generatorOptions,
-                                    BSI.IRowDataParser parser)
-        { 
-            _generatorOptions = generatorOptions;
-            _parser = parser;
+        public RowContentProvider(IOptions<INF.GeneratorOptions> generatorOptions)
+        {   
+            _generatorOptions = generatorOptions;           
         }
 
         #endregion
@@ -34,7 +31,7 @@ namespace BusinessLogic.Services.Implementations
 
 
         #region Public Methods
-        public BLO.RowData? Generate()
+        public ReadOnlyMemory<char> Generate()
         {
             var strings = _generatorOptions.Value.Strings;
             var ints = _generatorOptions.Value.Numbers;
@@ -54,7 +51,7 @@ namespace BusinessLogic.Services.Implementations
 
             string text = string.Join(" ", components);
 
-            return _parser.Parse($"{ints[intsIndex]}. {text}");
+            return $"{ints[intsIndex]}. {text}".AsMemory();
         }
 
         #endregion

@@ -71,6 +71,14 @@ namespace BusinessLogic.Services.Implementations
 
                 channel.Writer.Complete();
             }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("file split operation was canceled.");
+
+                channel.Writer.Complete();
+
+                throw;
+            }
             catch (Exception ex)
             {
                 channel.Writer.Complete(ex);
@@ -99,37 +107,35 @@ namespace BusinessLogic.Services.Implementations
 
             var rows = new List<string>();
 
-            using var reader = new StreamReader($"{folder}\\{BLC.Files.InputFile}",
-                                                Encoding.UTF8, false,
-                                                BLC.StreamBuffers.ReadBufferSize);
-
-            string? line;
-
-            while ((line = reader.ReadLine()) != null)
+            using (var reader = new StreamReader($"{folder}\\{BLC.Files.InputFile}",
+                                                        Encoding.UTF8, false,
+                                                        BLC.StreamBuffers.ReadBufferSize))
             {
-                if (token.IsCancellationRequested == true)
+                string? line;
+
+                while ((line = reader.ReadLine()) != null)
                 {
-                    break;
+                    token.ThrowIfCancellationRequested();
+
+                    long rowSize = line.Length + 1;
+
+                    if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
+                    {
+                        chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
+
+                        await channelWriter.WriteAsync(
+                            new BLO.ChannelChunkData(chunkFileName, rows));
+
+                        _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
+
+                        rows = new List<string>();
+                        fileIndex++;
+                        currentFileSize = 0;
+                    }
+
+                    rows.Add(line);
+                    currentFileSize += rowSize;
                 }
-
-                long rowSize = line.Length + 1;
-
-                if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
-                {
-                    chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
-
-                    await channelWriter.WriteAsync(
-                        new BLO.ChannelChunkData(chunkFileName, rows));
-                    
-                    _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
-
-                    rows = new List<string>();
-                    fileIndex++;
-                    currentFileSize = 0;
-                }
-
-                rows.Add(line);
-                currentFileSize += rowSize;
             }
 
             if (rows.Count > 0)
@@ -147,39 +153,61 @@ namespace BusinessLogic.Services.Implementations
                                                ConcurrentBag<string> chunkFiles,
                                                ILogger<FileSplitter> logger,
                                                CancellationToken token)
-        {           
+        {
             var parser = new RowDataParser();
             var comparer = new RowDataComparer();
 
-            await foreach (var chunk in channelReader.ReadAllAsync(token))
+            try
             {
-                var rows = new List<BLO.RowData>();
-
-                chunk.Rows.ForEach(line =>
+                await foreach (var chunk in channelReader.ReadAllAsync(token))
                 {
-                    var row = parser.Parse(line);
-                    if (row != null)
-                    {
-                        rows.Add((BLO.RowData)row);
-                    }
-                });
+                    var rows = new List<BLO.RowData>();
 
-                rows.Sort(comparer);
-
-                using (var writer = new StreamWriter(chunk.FullFileName, false, Encoding.UTF8,
-                                                     BLC.StreamBuffers.WriteBufferSize))
-                {
-                    foreach (var row in rows)
+                    chunk.Rows.ForEach(line =>
                     {
-                        writer.WriteLine(row.Original);
+                        token.ThrowIfCancellationRequested();
+
+                        var row = parser.Parse(line);
+
+                        if (row != null)
+                        {
+                            rows.Add((BLO.RowData)row);
+                        }
+                    });
+
+                    rows.Sort(comparer);
+
+                    using (var writer = new StreamWriter(chunk.FullFileName, false, Encoding.UTF8,
+                                                         BLC.StreamBuffers.WriteBufferSize))
+                    {
+                        foreach (var row in rows)
+                        {
+                            token.ThrowIfCancellationRequested();
+
+                            writer.WriteLine(row.Original);
+                        }
                     }
+
+                    chunkFiles.Add(chunk.FullFileName);
+
+                    logger.LogInformation("consumer processed chunk: {ChunkFileName} => {RowCount:N0} rows", chunk.FullFileName, rows.Count);
                 }
-
-                chunkFiles.Add(chunk.FullFileName);
-
-                logger.LogInformation("consumer processed chunk: {ChunkFileName} => {RowCount:N0} rows", chunk.FullFileName, rows.Count);
             }
+            catch (OperationCanceledException)
+            {
+                logger.LogWarning("consumer operation was canceled.");
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "consumer encountered an error: {ErrorMessage}", ex.Message);
+
+                throw;
+            }
+
         }
+
 
         #endregion
     }

@@ -107,6 +107,8 @@ namespace BusinessLogic.Services.Implementations
                 {
                     reader?.Dispose();
                 }
+
+                _readers.Clear();
             }
         }
 

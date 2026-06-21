@@ -1,12 +1,14 @@
 ﻿
 
+using BLE = BusinessLogic.Enums;
+
 namespace BusinessLogic.Objects
 {
     public class Result<T> where T : IServiceResponse
     {
         #region Private members
 
-        private bool _isSuccess = false;
+        private BLE.ResultStates _state;
         private Exception? _error;
         private T? _response;
 
@@ -17,14 +19,20 @@ namespace BusinessLogic.Objects
 
         private Result(T response)
         {
-            _isSuccess = true;
+            _state = BLE.ResultStates.Success;
             _error = null;
             _response = response;
         }
 
         private Result(Exception? error)
         {
-            _isSuccess = false;
+            _state = BLE.ResultStates.Failured;
+
+            if (error is OperationCanceledException)
+            {
+                _state = BLE.ResultStates.Cancelled;
+            }
+
             _error = error;
             _response = default;
         }
@@ -35,7 +43,8 @@ namespace BusinessLogic.Objects
 
         #region Public Properties
 
-        public bool IsSuccess => _isSuccess;
+        public bool IsSuccess => _state == BLE.ResultStates.Success;
+        public BLE.ResultStates State => _state;
         public Exception? Error => _error;
         public T? Response => _response;
 
@@ -51,6 +60,11 @@ namespace BusinessLogic.Objects
         }
 
         public static Result<T> Failure(Exception error)
+        {
+            return new Result<T>(error);
+        }
+
+        public static Result<T> Cancel(Exception error)
         {
             return new Result<T>(error);
         }

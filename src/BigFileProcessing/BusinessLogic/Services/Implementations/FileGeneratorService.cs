@@ -40,18 +40,15 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
 
         public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync(CancellationToken token)
-        {                       
-            var process = Process.GetCurrentProcess();
+        {
+            string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
 
             try
             {
                 _logger.LogInformation("starting file generation operation.");
 
-                long before = process.WorkingSet64;
-
                 var stopwatch = Stopwatch.StartNew();
 
-                string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
                 long number = 0;
                 long writtenBytes = 0;
 
@@ -67,21 +64,18 @@ namespace BusinessLogic.Services.Implementations
                 {
                     while (true)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var row = _rowContentProvider.Generate();
 
-                        if (row == null)
-                        {
-                            continue;
-                        }
-
-                        long rowBytes = ((BLO.RowData)row).Original.Length + 1;
+                        long rowBytes = row.Length + 1;
 
                         if (writtenBytes + rowBytes > _generatorOptions.Value.MaxFileSize)
                         {
                             break;
                         }
 
-                        await writer.WriteLineAsync(((BLO.RowData)row).Original);
+                        await writer.WriteLineAsync(row, token);
 
                         number++;
                         writtenBytes += rowBytes;
@@ -90,14 +84,11 @@ namespace BusinessLogic.Services.Implementations
 
                 stopwatch.Stop();
 
-                long after = process.WorkingSet64;
-
                 var output = new BLO.FileGenerationResponse()
                 {
                     FileName = fileName,
                     TotalRecords = number, 
                     ElapsedTime = stopwatch.ElapsedMilliseconds,
-                    UsedMemory = after - before,
                     SavedContentSize = writtenBytes
                 };
 
@@ -105,8 +96,24 @@ namespace BusinessLogic.Services.Implementations
 
                 return BLO.Result<BLO.FileGenerationResponse>.Success(output);
             }
+            catch (OperationCanceledException ex)
+            {
+                if (File.Exists(fileName) == true)
+                {
+                    File.Delete(fileName);
+                }
+
+                _logger.LogWarning("file generation operation was canceled.");
+
+                return BLO.Result<BLO.FileGenerationResponse>.Cancel(ex);
+            }
             catch (Exception ex)
             {
+                if (File.Exists(fileName) == true)
+                {
+                    File.Delete(fileName);
+                }
+
                 _logger.LogError(ex, "an error occurred during the file generation operation.");
 
                 return BLO.Result<BLO.FileGenerationResponse>.Failure(ex);
