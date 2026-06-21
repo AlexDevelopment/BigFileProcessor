@@ -7,15 +7,13 @@ namespace Services.Tests
 {
     public class RowContentProviderTests
     {
-        // RowContentProvider relies on the real parser to turn the composed string into RowData.
         private static BLI.IRowContentProvider Create(int[] numbers, string[] strings, int maxTextComponentCount)
         {
             return new Impl.RowContentProvider(
                 OptionsFactory.Generator("ignored",
                                          numbers: numbers,
                                          strings: strings,
-                                         maxTextComponentCount: maxTextComponentCount),
-                new Impl.RowDataParser());
+                                         maxTextComponentCount: maxTextComponentCount));
         }
 
         [Fact]
@@ -25,12 +23,18 @@ namespace Services.Tests
             var strings = new[] { "alpha" };    // single token  -> deterministic content
             var provider = Create(numbers, strings, maxTextComponentCount: 2);
 
-            var row = provider.Generate();
+            var content = provider.Generate();
 
-            Assert.NotNull(row);
-            Assert.Equal(5, row!.Value.Number);
-
-            foreach (var token in row.Value.TextSpan.ToString().Split(' '))
+            Assert.False(content.IsEmpty);
+            
+            var contentString = content.ToString();
+            var parts = contentString.Split('.');
+            
+            Assert.Equal(2, parts.Length);
+            Assert.Equal("5", parts[0]);
+            
+            var textPart = parts[1].Trim();
+            foreach (var token in textPart.Split(' '))
             {
                 Assert.Contains(token, strings);
             }
@@ -45,12 +49,22 @@ namespace Services.Tests
 
             for (int i = 0; i < 200; i++)
             {
-                var row = provider.Generate();
+                var content = provider.Generate();
 
-                Assert.NotNull(row);
-                Assert.True(row!.Value.Number >= 1 && row.Value.Number <= 4);
-                Assert.False(string.IsNullOrWhiteSpace(row.Value.TextSpan.ToString()));
+                Assert.False(content.IsEmpty);
+                
+                var contentString = content.ToString();
+                var parts = contentString.Split('.');
+                
+                Assert.Equal(2, parts.Length);
+                
+                int number = int.Parse(parts[0]);
+                Assert.True(number >= 1 && number <= 4);
+                
+                var textPart = parts[1].Trim();
+                Assert.False(string.IsNullOrWhiteSpace(textPart));
             }
         }
     }
 }
+

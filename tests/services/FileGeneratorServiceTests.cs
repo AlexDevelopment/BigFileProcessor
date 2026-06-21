@@ -11,7 +11,7 @@ namespace Services.Tests
     public class FileGeneratorServiceTests
     {
         // "5. text" is 7 chars, the service counts rowBytes = length + 1 = 8.
-        private static readonly BLO.RowData SampleRow = new BLO.RowData("5. text", 5, 3);
+        private static readonly ReadOnlyMemory<char> SampleRow = "5. text".AsMemory();
 
         private static BLI.IFileGeneratorService Create(string folder, long maxFileSize, BLI.IRowContentProvider provider)
         {
@@ -41,23 +41,6 @@ namespace Services.Tests
             Assert.Equal(expectedFile, result.Response.FileName);
             Assert.True(File.Exists(expectedFile));
             Assert.Equal(5, File.ReadAllLines(expectedFile).Length);
-        }
-
-        [Fact]
-        public async Task GenerateAsync_SkipsNullRowsWithoutCountingThem()
-        {
-            using var folder = new TempFolder();
-
-            int call = 0;
-            var provider = new Mock<BLI.IRowContentProvider>();
-            // first row is null (skipped via continue), everything afterwards is valid
-            provider.Setup(p => p.Generate())
-                    .Returns(() => call++ == 0 ? (BLO.RowData?)null : SampleRow);
-
-            var result = await Create(folder.Path, maxFileSize: 40, provider.Object).GenerateAsync(CancellationToken.None);
-
-            Assert.True(result.IsSuccess);
-            Assert.Equal(5, result.Response!.TotalRecords);   // null row did not count
         }
 
         [Fact]
@@ -93,3 +76,4 @@ namespace Services.Tests
         }
     }
 }
+
