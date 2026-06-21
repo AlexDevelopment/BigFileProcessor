@@ -1,12 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 
-using INF = Infrastructure;
+using NLog.Extensions.Logging;
 
 using BSI = BusinessLogic.Services.Interfaces;
 using BSIM = BusinessLogic.Services.Implementations;
+using INF = Infrastructure;
 
 
 namespace Generator
@@ -23,9 +25,13 @@ namespace Generator
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddOptions<INF.GeneratorOptions>()
-                .Bind(configuration.GetSection(INF.GeneratorOptions.SectionName))
-                .ValidateDataAnnotations();
+            services
+                .Configure<INF.GeneratorOptions>(
+                    configuration.GetSection(INF.GeneratorOptions.SectionName))
+                .ConfigureOptions<INF.ConfigureGeneratorOptionsDefaults>()
+                .AddOptions<INF.GeneratorOptions>()
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
             services.AddLogging(loggingBuilder =>
             {

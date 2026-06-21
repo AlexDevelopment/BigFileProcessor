@@ -16,7 +16,9 @@ var serviceProvider = services.BuildServiceProvider();
 var service = serviceProvider.GetRequiredService<BSI.IFileGeneratorService>();
 var options = serviceProvider.GetRequiredService<IOptions<INF.GeneratorOptions>>();
 
-Console.WriteLine($"output folder: {options.Value.Folder}\n\n");
+Console.WriteLine($"output folder: {options.Value.Folder}");
+Console.WriteLine($"max file size: {options.Value.MaxFileSize:N0} in bytes");
+Console.WriteLine($"max text component count: {options.Value.MaxTextComponentCount}\n\n");
 Console.WriteLine("start file generation...\n");
 
 var result = await service.GenerateAsync();
