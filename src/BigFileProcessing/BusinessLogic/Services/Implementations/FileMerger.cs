@@ -8,6 +8,9 @@ using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Merges multiple sorted files into a single output file.
+    /// </summary>
     public class FileMerger : BLI.IFileMerger
     {
         #region Private Members

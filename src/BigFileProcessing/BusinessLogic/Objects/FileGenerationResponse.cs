@@ -1,6 +1,9 @@
 ﻿
 namespace BusinessLogic.Objects
 {
+    /// <summary>
+    /// Represents the response of a file generation operation.
+    /// </summary>
     public record FileGenerationResponse : IServiceResponse
     {
         #region Public Properties

@@ -7,6 +7,9 @@ using BLO = BusinessLogic.Objects;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Parses lines of text into <see cref="BLO.RowData"/> objects.
+    /// </summary>
     public class RowDataParser : BLI.IRowDataParser
     {
         #region Public Methods

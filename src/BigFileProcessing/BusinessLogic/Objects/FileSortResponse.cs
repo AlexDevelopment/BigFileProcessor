@@ -1,6 +1,9 @@
 ﻿
 namespace BusinessLogic.Objects
 {
+    /// <summary>
+    /// Represents the response of a file sort operation.
+    /// </summary>
     public record FileSortResponse : IServiceResponse
     {
         #region Public Properties

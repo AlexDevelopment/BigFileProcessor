@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.Objects
 {
+    /// <summary>
+    /// Represents a row of data in the system.
+    /// </summary>
     public readonly struct RowData
     {
         public readonly string Original; 

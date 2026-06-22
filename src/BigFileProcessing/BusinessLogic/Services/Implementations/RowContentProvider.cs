@@ -8,11 +8,13 @@ using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Provides random content for rows in the system.
+    /// </summary>
     public class RowContentProvider : BSI.IRowContentProvider
     {
         #region Private Members
 
-        private readonly Random _random = new Random();
         private readonly IOptions<INF.GeneratorOptions> _generatorOptions;
         
         #endregion
@@ -37,14 +39,14 @@ namespace BusinessLogic.Services.Implementations
             var ints = _generatorOptions.Value.Numbers;
             var maxTextComponentCount = _generatorOptions.Value.MaxTextComponentCount;
 
-            int intsIndex = _random.Next(0, ints.Length);            
+            int intsIndex = Random.Shared.Next(0, ints.Length);            
 
-            int length = _random.Next(1, maxTextComponentCount);
+            int length = Random.Shared.Next(1, maxTextComponentCount + 1);
             List<string> components = new List<string>();
 
             for (int k = 0; k < length; k++)
             {
-                int index = _random.Next(0, strings.Length);
+                int index = Random.Shared.Next(0, strings.Length);
 
                 components.Add(strings[index]);
             }

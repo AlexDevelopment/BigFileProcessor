@@ -11,6 +11,9 @@ using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Generates files with random content for testing purposes.
+    /// </summary>
     public class FileGeneratorService : BLI.IFileGeneratorService
     {
         #region Private Members

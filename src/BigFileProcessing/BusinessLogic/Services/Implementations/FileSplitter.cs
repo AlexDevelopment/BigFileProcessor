@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NLog.Filters;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading.Channels;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 using BLC = BusinessLogic.Constants;
 using BLI = BusinessLogic.Services.Interfaces;
 using BLO = BusinessLogic.Objects;
@@ -11,6 +12,9 @@ using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Splits a large input file into smaller chunks for processing.
+    /// </summary>
     public class FileSplitter : BLI.IFileSplitter
     {
         #region Private Members

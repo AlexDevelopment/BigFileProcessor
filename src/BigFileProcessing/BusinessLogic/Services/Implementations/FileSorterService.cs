@@ -11,6 +11,9 @@ using INF = Infrastructure;
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Sorts large files by splitting them into smaller chunks, sorting each chunk, and then merging the sorted chunks.
+    /// </summary>
     public class FileSorterService : BLI.IFileSorterService
     {
         #region Private Members
@@ -54,8 +57,8 @@ namespace BusinessLogic.Services.Implementations
 
                 var stopwatch = Stopwatch.StartNew();
 
-                string inputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.InputFile}";
-                string outputFileName = $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}";
+                string inputFileName = Path.Combine(_sorterOptions.Value.Folder, BLC.Files.InputFile);
+                string outputFileName = Path.Combine(_sorterOptions.Value.Folder, BLC.Files.OutputFile);
 
                 _logger.LogInformation("input file: {InputFileName}", inputFileName);
                 _logger.LogInformation("output file: {OutputFileName}", outputFileName);

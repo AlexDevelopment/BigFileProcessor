@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Deletes files from the file system.
+    /// </summary>
     public class FileDeleter : BLI.IFileDeleter
     {
         #region Public Methods

@@ -4,6 +4,10 @@ using BLE = BusinessLogic.Enums;
 
 namespace BusinessLogic.Objects
 {
+    /// <summary>
+    /// Represents the result of a service operation.
+    /// </summary>
+    /// <typeparam name="T">The type of the service response.</typeparam>
     public class Result<T> where T : IServiceResponse
     {
         #region Private members

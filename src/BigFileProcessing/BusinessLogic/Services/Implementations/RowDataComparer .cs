@@ -3,6 +3,9 @@
 
 namespace BusinessLogic.Services.Implementations
 {
+    /// <summary>
+    /// Compares two RowData objects for sorting purposes.
+    /// </summary>
     struct RowDataComparer : IComparer<BLO.RowData>
     {
         #region Public Methods
