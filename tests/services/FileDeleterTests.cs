@@ -19,7 +19,7 @@ namespace Services.Tests
             File.WriteAllText(a, "a");
             File.WriteAllText(b, "b");
 
-            await _deleter.DeleteFilesAsync(new List<string> { a, b });
+            await _deleter.DeleteFilesAsync(new List<string> { a, b }, CancellationToken.None);
 
             Assert.False(File.Exists(a));
             Assert.False(File.Exists(b));
@@ -36,7 +36,7 @@ namespace Services.Tests
             var missing = folder.File("does-not-exist.txt");
 
             // should not throw even though one of the files is absent
-            await _deleter.DeleteFilesAsync(new List<string> { missing, existing });
+            await _deleter.DeleteFilesAsync(new List<string> { missing, existing }, CancellationToken.None);
 
             Assert.False(File.Exists(existing));
         }
@@ -44,7 +44,7 @@ namespace Services.Tests
         [Fact]
         public async Task DeleteFilesAsync_EmptyList_DoesNothing()
         {
-            await _deleter.DeleteFilesAsync(new List<string>());
+            await _deleter.DeleteFilesAsync(new List<string>(), CancellationToken.None);
         }
     }
 }

@@ -85,7 +85,7 @@ namespace BusinessLogic.Services.Implementations
 
                 token.ThrowIfCancellationRequested();
 
-                _merger.MergeFiles(files);
+                _merger.MergeFiles(files, token);
 
                 mergeWatch.Stop();
 
@@ -108,7 +108,7 @@ namespace BusinessLogic.Services.Implementations
 
                 _logger.LogInformation("starting file delete operation...");
 
-                await _deleter.DeleteFilesAsync(files);
+                await _deleter.DeleteFilesAsync(files, token);
 
                 _logger.LogInformation("file delete operation completed successfully.");
 

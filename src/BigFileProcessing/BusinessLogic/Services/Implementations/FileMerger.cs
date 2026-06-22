@@ -36,7 +36,7 @@ namespace BusinessLogic.Services.Implementations
 
         #region Public Methods
 
-        public void MergeFiles(List<string> files)
+        public void MergeFiles(List<string> files, CancellationToken token)
         {
             StreamWriter writer = new StreamWriter(
                                         $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}",
@@ -53,6 +53,8 @@ namespace BusinessLogic.Services.Implementations
 
                 for (int i = 0; i < _readers.Count; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var line = _readers[i].ReadLine();
 
                     if (line == null) 
@@ -74,6 +76,8 @@ namespace BusinessLogic.Services.Implementations
 
                 while (queue.Count > 0)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var item = queue.Dequeue();
 
                     writer.WriteLine(item.Row.Original);
@@ -95,6 +99,10 @@ namespace BusinessLogic.Services.Implementations
                     }
                 }
             }
+            catch(OperationCanceledException)
+            {
+                throw;
+            }   
             catch (Exception ex)
             {
                 throw new FileMergerException(ex);

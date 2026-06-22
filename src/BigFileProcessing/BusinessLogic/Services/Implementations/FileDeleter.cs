@@ -6,10 +6,12 @@ namespace BusinessLogic.Services.Implementations
     {
         #region Public Methods
 
-        public Task DeleteFilesAsync(List<string> files)
+        public Task DeleteFilesAsync(List<string> files, CancellationToken token)
         {
             foreach (var file in files)
             {
+                token.ThrowIfCancellationRequested();
+
                 if (File.Exists(file) == true)
                 {
                     File.Delete(file);

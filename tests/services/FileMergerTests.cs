@@ -24,7 +24,7 @@ namespace Services.Tests
             File.WriteAllLines(fileA, new[] { "1. apple", "3. banana" });
             File.WriteAllLines(fileB, new[] { "5. apple", "2. cherry" });
 
-            Create(folder.Path).MergeFiles(new List<string> { fileA, fileB });
+            Create(folder.Path).MergeFiles(new List<string> { fileA, fileB }, CancellationToken.None);
 
             var output = File.ReadAllLines(folder.File("sorted.txt"));
 
@@ -40,7 +40,7 @@ namespace Services.Tests
             var file = folder.File("chunk_0.txt");
             File.WriteAllLines(file, new[] { "1. a", "2. b" });
 
-            Create(folder.Path).MergeFiles(new List<string> { file });
+            Create(folder.Path).MergeFiles(new List<string> { file }, CancellationToken.None);
 
             Assert.Equal(new[] { "1. a", "2. b" }, File.ReadAllLines(folder.File("sorted.txt")));
         }
@@ -53,7 +53,7 @@ namespace Services.Tests
             var missing = folder.File("does-not-exist.txt");
 
             Assert.Throws<FileMergerException>(
-                () => Create(folder.Path).MergeFiles(new List<string> { missing }));
+                () => Create(folder.Path).MergeFiles(new List<string> { missing }, CancellationToken.None));
         }
     }
 }

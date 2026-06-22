@@ -37,7 +37,7 @@ namespace Services.Tests
 
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();
-            deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>())).Returns(Task.CompletedTask);
+            deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
             var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object,
                                       consumerCount: 3, channelCapacity: 7).SortAsync(CancellationToken.None);
@@ -50,8 +50,8 @@ namespace Services.Tests
             Assert.Equal(7, result.Response.ChannelCapacity);
 
             splitter.Verify(s => s.SplitInputFileAsync(CancellationToken.None), Times.Once);
-            merger.Verify(m => m.MergeFiles(chunks), Times.Once);
-            deleter.Verify(d => d.DeleteFilesAsync(chunks), Times.Once);
+            merger.Verify(m => m.MergeFiles(chunks, CancellationToken.None), Times.Once);
+            deleter.Verify(d => d.DeleteFilesAsync(chunks, CancellationToken.None), Times.Once);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Services.Tests
 
             var merger = new Mock<BLI.IFileMerger>();
             var deleter = new Mock<BLI.IFileDeleter>();
-            deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>())).Returns(Task.CompletedTask);
+            deleter.Setup(d => d.DeleteFilesAsync(It.IsAny<List<string>>(), CancellationToken.None)).Returns(Task.CompletedTask);
 
             var result = await Create(folder.Path, splitter.Object, merger.Object, deleter.Object).SortAsync(CancellationToken.None);
 
@@ -92,8 +92,8 @@ namespace Services.Tests
             Assert.False(result.IsSuccess);
             Assert.IsType<IOException>(result.Error);
 
-            merger.Verify(m => m.MergeFiles(It.IsAny<List<string>>()), Times.Never);
-            deleter.Verify(d => d.DeleteFilesAsync(It.IsAny<List<string>>()), Times.Never);
+            merger.Verify(m => m.MergeFiles(It.IsAny<List<string>>(), CancellationToken.None), Times.Never);
+            deleter.Verify(d => d.DeleteFilesAsync(It.IsAny<List<string>>(), CancellationToken.None), Times.Never);
         }
     }
 }
