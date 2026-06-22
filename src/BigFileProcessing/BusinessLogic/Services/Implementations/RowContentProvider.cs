@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
-
-using BSI = BusinessLogic.Services.Interfaces;
+using System.Text;
 using BLO = BusinessLogic.Objects;
-
+using BSI = BusinessLogic.Services.Interfaces;
 using INF = Infrastructure;
 
 
@@ -36,24 +35,30 @@ namespace BusinessLogic.Services.Implementations
         public ReadOnlyMemory<char> Generate()
         {
             var strings = _generatorOptions.Value.Strings;
-            var ints = _generatorOptions.Value.Numbers;
+            var numbers = _generatorOptions.Value.Numbers;
             var maxTextComponentCount = _generatorOptions.Value.MaxTextComponentCount;
 
-            int intsIndex = Random.Shared.Next(0, ints.Length);            
+            int numbersIndex = Random.Shared.Next(0, numbers.Length);
+
+            var builder = new StringBuilder();
+
+            builder.Append(numbers[numbersIndex]);
+            builder.Append(". ");
 
             int length = Random.Shared.Next(1, maxTextComponentCount + 1);
-            List<string> components = new List<string>();
 
-            for (int k = 0; k < length; k++)
+            for (int i = 0; i < length; i++)
             {
-                int index = Random.Shared.Next(0, strings.Length);
+                if (i > 0)
+                {
+                    builder.Append(' ');
+                }
 
-                components.Add(strings[index]);
+                int stringIndex = Random.Shared.Next(strings.Length);
+                builder.Append(strings[stringIndex]);
             }
 
-            string text = string.Join(" ", components);
-
-            return $"{ints[intsIndex]}. {text}".AsMemory();
+            return builder.ToString().AsMemory();
         }
 
         #endregion

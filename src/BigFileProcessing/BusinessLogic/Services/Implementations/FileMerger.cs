@@ -39,7 +39,7 @@ namespace BusinessLogic.Services.Implementations
         public void MergeFiles(List<string> files, CancellationToken token)
         {
             StreamWriter writer = new StreamWriter(
-                                        $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}",
+                                        Path.Combine(_sorterOptions.Value.Folder, BLC.Files.OutputFile),
                                         false, Encoding.UTF8, BLC.StreamBuffers.WriteBufferSize);
 
             List<StreamReader> readers = new List<StreamReader>();

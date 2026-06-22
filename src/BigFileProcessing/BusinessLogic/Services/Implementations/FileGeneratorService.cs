@@ -44,7 +44,7 @@ namespace BusinessLogic.Services.Implementations
 
         public async Task<BLO.Result<BLO.FileGenerationResponse>> GenerateAsync(CancellationToken token)
         {
-            string fileName = $"{_generatorOptions.Value.Folder}\\{BLC.Files.InputFile}";
+            string fileName = Path.Combine(_generatorOptions.Value.Folder, BLC.Files.InputFile);
 
             try
             {

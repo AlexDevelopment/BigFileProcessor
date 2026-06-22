@@ -115,7 +115,7 @@ namespace BusinessLogic.Services.Implementations
 
             var rows = new List<string>();
 
-            using (var reader = new StreamReader($"{folder}\\{BLC.Files.InputFile}",
+            using (var reader = new StreamReader(Path.Combine(folder, BLC.Files.InputFile),
                                                         Encoding.UTF8, false,
                                                         BLC.StreamBuffers.ReadBufferSize))
             {
