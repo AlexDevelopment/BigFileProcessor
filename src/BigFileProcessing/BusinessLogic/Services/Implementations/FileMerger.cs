@@ -13,7 +13,6 @@ namespace BusinessLogic.Services.Implementations
         #region Private Members
 
         private readonly IOptions<INF.SorterOptions> _sorterOptions;
-        private readonly List<StreamReader> _readers;
         private readonly BLI.IRowDataParser _rowDataParser;
 
         #endregion
@@ -26,8 +25,6 @@ namespace BusinessLogic.Services.Implementations
         {
             _sorterOptions = sorterOptions;
             _rowDataParser = rowDataParser;
-
-            _readers = new List<StreamReader>();
         }
 
         #endregion
@@ -42,20 +39,22 @@ namespace BusinessLogic.Services.Implementations
                                         $"{_sorterOptions.Value.Folder}\\{BLC.Files.OutputFile}",
                                         false, Encoding.UTF8, BLC.StreamBuffers.WriteBufferSize);
 
+            List<StreamReader> readers = new List<StreamReader>();
+
             try
             { 
                 foreach (var file in files)
                 {
-                    _readers.Add(new StreamReader(file, Encoding.UTF8, false, BLC.StreamBuffers.ReadBufferSize));
+                    readers.Add(new StreamReader(file, Encoding.UTF8, false, BLC.StreamBuffers.ReadBufferSize));
                 }
 
                 var queue = new PriorityQueue<BLO.QueueItem, BLO.RowData>(new RowDataComparer());
 
-                for (int i = 0; i < _readers.Count; i++)
+                for (int i = 0; i < readers.Count; i++)
                 {
                     token.ThrowIfCancellationRequested();
 
-                    var line = _readers[i].ReadLine();
+                    var line = readers[i].ReadLine();
 
                     if (line == null) 
                     { 
@@ -82,20 +81,18 @@ namespace BusinessLogic.Services.Implementations
 
                     writer.WriteLine(item.Row.Original);
 
-                    var nextLine = _readers[item.ReaderIndex].ReadLine();
+                    var nextLine = readers[item.ReaderIndex].ReadLine();
 
                     if (nextLine != null)
                     {
                         var row = _rowDataParser.Parse(nextLine);
 
-                        if (row == null)
+                        if (row != null)
                         {
-                            continue;
+                            BLO.RowData realRow = (BLO.RowData)row;
+
+                            queue.Enqueue(new BLO.QueueItem(Row: realRow, ReaderIndex: item.ReaderIndex), realRow);
                         }
-
-                        BLO.RowData realRow = (BLO.RowData)row;
-
-                        queue.Enqueue(new BLO.QueueItem(Row: realRow, ReaderIndex: item.ReaderIndex), realRow);
                     }
                 }
             }
@@ -111,12 +108,12 @@ namespace BusinessLogic.Services.Implementations
             {
                 writer?.Dispose();
 
-                foreach (var reader in _readers)
+                foreach (var reader in readers)
                 {
                     reader?.Dispose();
                 }
 
-                _readers.Clear();
+                readers.Clear();
             }
         }
 

@@ -68,7 +68,7 @@ namespace BusinessLogic.Services.Implementations
 
                         var row = _rowContentProvider.Generate();
 
-                        long rowBytes = row.Length + 1;
+                        long rowBytes = Encoding.UTF8.GetByteCount(row.ToArray()) + 1;
 
                         if (writtenBytes + rowBytes > _generatorOptions.Value.MaxFileSize)
                         {

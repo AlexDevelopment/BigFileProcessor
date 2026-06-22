@@ -71,20 +71,24 @@ namespace BusinessLogic.Services.Implementations
 
                 channel.Writer.Complete();
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
                 _logger.LogWarning("file split operation was canceled.");
 
-                channel.Writer.Complete();
+                channel.Writer.Complete(ex);
 
                 throw;
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "file split operation encountered an error: {ErrorMessage}", ex.Message);
+
                 channel.Writer.Complete(ex);
             }
-
-            await Task.WhenAll(consumers);
+            finally
+            {
+                await Task.WhenAll(consumers);
+            }
 
             return chunkFiles.ToList();
         }
@@ -117,7 +121,7 @@ namespace BusinessLogic.Services.Implementations
                 {
                     token.ThrowIfCancellationRequested();
 
-                    long rowSize = line.Length + 1;
+                    long rowSize = Encoding.UTF8.GetByteCount(line) + 1;
 
                     if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
                     {

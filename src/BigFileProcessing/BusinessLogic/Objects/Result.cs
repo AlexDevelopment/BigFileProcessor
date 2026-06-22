@@ -24,15 +24,9 @@ namespace BusinessLogic.Objects
             _response = response;
         }
 
-        private Result(Exception? error)
+        private Result(Exception error, bool isCancelled = false)
         {
-            _state = BLE.ResultStates.Failured;
-
-            if (error is OperationCanceledException)
-            {
-                _state = BLE.ResultStates.Cancelled;
-            }
-
+            _state = isCancelled == true ? BLE.ResultStates.Cancelled : BLE.ResultStates.Failed;
             _error = error;
             _response = default;
         }
@@ -61,12 +55,12 @@ namespace BusinessLogic.Objects
 
         public static Result<T> Failure(Exception error)
         {
-            return new Result<T>(error);
+            return new Result<T>(error: error, isCancelled: false);
         }
 
         public static Result<T> Cancel(Exception error)
         {
-            return new Result<T>(error);
+            return new Result<T>(error: error, isCancelled: true);
         }
 
         #endregion

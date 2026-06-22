@@ -9,7 +9,7 @@ namespace BusinessLogic.Enums
     public enum ResultStates
     {
         Success = 1,
-        Failured = 2,
+        Failed = 2,
         Cancelled = 3
     }
 }
