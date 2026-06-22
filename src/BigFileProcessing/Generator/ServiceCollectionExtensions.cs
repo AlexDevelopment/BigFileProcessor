@@ -31,6 +31,9 @@ namespace Generator
                 .ConfigureOptions<INF.ConfigureGeneratorOptionsDefaults>()
                 .AddOptions<INF.GeneratorOptions>()
                 .ValidateDataAnnotations()
+                .Validate(
+                        options => !string.IsNullOrWhiteSpace(options.Folder),
+                        "Folder must be specified.")
                 .ValidateOnStart();
 
             services.AddLogging(loggingBuilder =>

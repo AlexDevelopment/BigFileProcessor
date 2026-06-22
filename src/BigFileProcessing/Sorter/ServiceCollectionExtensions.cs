@@ -29,6 +29,9 @@ namespace Sorter
                 .ConfigureOptions<INF.ConfigureSorterOptionsDefaults>()
                 .AddOptions<INF.SorterOptions>()
                 .ValidateDataAnnotations()
+                .Validate(
+                        options => !string.IsNullOrWhiteSpace(options.Folder),
+                        "Folder must be specified.")
                 .ValidateOnStart();
 
             services.AddLogging(loggingBuilder =>
