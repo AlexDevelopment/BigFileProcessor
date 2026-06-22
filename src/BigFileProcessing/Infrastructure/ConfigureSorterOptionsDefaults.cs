@@ -10,7 +10,7 @@ namespace Infrastructure
         {
             if (options.MaxChunkSize <= 0)
             {
-                options.MaxChunkSize = 1000; // Default max chunk size
+                options.MaxChunkSize = 1_048_576; // Default max chunk size - 1Mb
             }
 
             if (options.ChannelCapacity <= 0)

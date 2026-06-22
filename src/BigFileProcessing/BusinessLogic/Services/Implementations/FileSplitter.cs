@@ -136,7 +136,7 @@ namespace BusinessLogic.Services.Implementations
 
                         _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
 
-                        rows = new List<string>();
+                        rows = new List<string>(rows.Count);
                         fileIndex++;
                         currentFileSize = 0;
                     }
