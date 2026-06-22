@@ -49,6 +49,8 @@ namespace BusinessLogic.Services.Implementations
         #region Public Methods
         public async Task<BLO.Result<BLO.FileSortResponse>> SortAsync(CancellationToken token)
         {
+            List<string> files = new List<string>();
+
             try
             {
                 token.ThrowIfCancellationRequested();
@@ -76,7 +78,7 @@ namespace BusinessLogic.Services.Implementations
 
                 token.ThrowIfCancellationRequested();
 
-                var files = await _splitter.SplitInputFileAsync(token);
+                files = await _splitter.SplitInputFileAsync(token);
 
                 splitWatch.Stop();
 
@@ -106,14 +108,6 @@ namespace BusinessLogic.Services.Implementations
                     ConsumerCount = _sorterOptions.Value.ConsumerCount,
                     ChannelCapacity = _sorterOptions.Value.ChannelCapacity
                 };
-                
-                //the file deletion is outside of time measurement, as it is not part of the sorting operation
-
-                _logger.LogInformation("starting file delete operation...");
-
-                await _deleter.DeleteFilesAsync(files, token);
-
-                _logger.LogInformation("file delete operation completed successfully.");
 
                 _logger.LogInformation("file sort operation completed successfully. {Output}", output.ToLog());
 
@@ -130,6 +124,27 @@ namespace BusinessLogic.Services.Implementations
                 _logger.LogError(ex, "an error occurred during the file sort operation.");
 
                 return BLO.Result<BLO.FileSortResponse>.Failure(ex);
+            }
+            finally
+            {
+                //chunk files are temporary and must be removed regardless of the outcome (success, failure or cancellation).
+                //cleanup runs with CancellationToken.None so it always completes, and never throws so it cannot mask the result.
+
+                if (files.Count > 0)
+                {
+                    try
+                    {
+                        _logger.LogInformation("starting file delete operation...");
+
+                        await _deleter.DeleteFilesAsync(files, CancellationToken.None);
+
+                        _logger.LogInformation("file delete operation completed successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "failed to delete temporary chunk files.");
+                    }
+                }
             }
         }
 
