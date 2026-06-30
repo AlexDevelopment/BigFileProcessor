@@ -169,7 +169,7 @@ namespace BusinessLogic.Services.Implementations
             {
                 await foreach (var chunk in channelReader.ReadAllAsync(token))
                 {
-                    var rows = new List<BLO.RowData>();
+                    var rows = new List<BLO.RowData>(chunk.Rows.Count);
 
                     chunk.Rows.ForEach(line =>
                     {
