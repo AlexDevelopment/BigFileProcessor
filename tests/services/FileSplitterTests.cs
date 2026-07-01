@@ -12,7 +12,7 @@ namespace Services.Tests
         {
             return new Impl.FileSplitter(
                 OptionsFactory.Sorter(folder, maxChunkSize: maxChunkSize, channelCapacity: 4, consumerCount: 2),
-                new Impl.ChunkFileNameComposer(),
+                new Impl.InputFileReader(new Impl.ChunkFileNameComposer()),
                 NullLogger<Impl.FileSplitter>.Instance);
         }
 
@@ -74,7 +74,7 @@ namespace Services.Tests
 
             var splitter = new Impl.FileSplitter(
                 OptionsFactory.Sorter(folder.Path, maxChunkSize: 1024, channelCapacity: 1, consumerCount: 1),
-                new Impl.ChunkFileNameComposer(),
+                new Impl.InputFileReader(new Impl.ChunkFileNameComposer()),
                 NullLogger<Impl.FileSplitter>.Instance);
 
             var files = await splitter.SplitInputFileAsync(CancellationToken.None);

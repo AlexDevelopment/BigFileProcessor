@@ -19,9 +19,8 @@ namespace BusinessLogic.Services.Implementations
     {
         #region Private Members
 
-        private readonly IOptions<INF.SorterOptions> _sorterOptions;
-        private readonly BLI.IChunkFileNameComposer _chunkFileNameComposer;
-
+        private readonly IOptions<INF.SorterOptions> _sorterOptions;        
+        private readonly BLI.IInputFileReader _chunkReader;
         private readonly ILogger<FileSplitter> _logger;
 
         #endregion
@@ -31,11 +30,11 @@ namespace BusinessLogic.Services.Implementations
         #region Constructors
 
         public FileSplitter(IOptions<INF.SorterOptions> sorterOptions, 
-                                BLI.IChunkFileNameComposer chunkFileNameComposer,
+                                BLI.IInputFileReader chunkReader,
                                 ILogger<FileSplitter> logger)
         {
             _sorterOptions = sorterOptions;
-            _chunkFileNameComposer = chunkFileNameComposer;
+            _chunkReader = chunkReader;
             _logger = logger;
         }
 
@@ -107,55 +106,14 @@ namespace BusinessLogic.Services.Implementations
         {
             string folder = _sorterOptions.Value.Folder;
             long maxChunkSize = _sorterOptions.Value.MaxChunkSize;
+                      
+            string inputFileName = Path.Combine(folder, BLC.Files.InputFile);
 
-            int fileIndex = 0;
-            long currentFileSize = 0;
-
-            string chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
-
-            var rows = new List<string>();
-
-            using (var reader = new StreamReader(Path.Combine(folder, BLC.Files.InputFile),
-                                                        Encoding.UTF8, false,
-                                                        BLC.StreamBuffers.ReadBufferSize))
+            foreach (var chunk in _chunkReader.ReadChunks(inputFileName, folder, maxChunkSize, token))
             {
-                string? line;
-
-                while ((line = reader.ReadLine()) != null)
-                {
-                    token.ThrowIfCancellationRequested();
-
-                    long rowSize = Encoding.UTF8.GetByteCount(line) + 1;
-
-                    if (currentFileSize + rowSize > maxChunkSize && rows.Count > 0)
-                    {
-                        chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
-
-                        await channelWriter.WriteAsync(
-                            new BLO.ChannelChunkData(chunkFileName, rows));
-
-                        _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount:N0} rows", chunkFileName, rows.Count);
-
-                        rows = new List<string>(rows.Count);
-                        fileIndex++;
-                        currentFileSize = 0;
-                    }
-
-                    rows.Add(line);
-                    currentFileSize += rowSize;
-                }
+                await channelWriter.WriteAsync(chunk, token);
             }
-
-            if (rows.Count > 0)
-            {
-                chunkFileName = _chunkFileNameComposer.GetFullFileName(folder, fileIndex);
-
-                await channelWriter.WriteAsync(
-                    new BLO.ChannelChunkData(chunkFileName, rows));
-
-                _logger.LogInformation("producer sent chunk: {ChunkFileName} / {RowCount} rows", chunkFileName, rows.Count);
-            }
-        }
+        }                
 
         private static async Task ConsumeAsync(ChannelReader<BLO.ChannelChunkData> channelReader,
                                                ConcurrentBag<string> chunkFiles,
